@@ -15,6 +15,7 @@
 
 Q_DECLARE_METATYPE(cv::Mat)
 Q_DECLARE_METATYPE(ros::Time)
+Q_DECLARE_METATYPE(ros::Duration)
 Q_DECLARE_METATYPE(audio_common_msgs::AudioDataConstPtr)
 
 using namespace std;
@@ -25,6 +26,7 @@ int main(int argc, char *argv[])
 {
     qRegisterMetaType<cv::Mat>();
     qRegisterMetaType<ros::Time>();
+    qRegisterMetaType<ros::Duration>();
     qRegisterMetaType<audio_common_msgs::AudioDataConstPtr>();
 
     QApplication app(argc, argv);
@@ -88,7 +90,7 @@ int main(int argc, char *argv[])
 
     QObject::connect(&app, &QApplication::lastWindowClosed, [&](){bagreader.stop();});
 
-    QObject::connect(&bagreader, &BagReader::timeUpdate, &aw, &AnnotatorWindow::showFPS);
+    QObject::connect(&bagreader, &BagReader::durationUpdate, &aw, &AnnotatorWindow::showBagInfo);
     QObject::connect(&bagreader, &BagReader::timeUpdate, timeline, &Timeline::setPlayhead);
 
     QObject::connect(&bagreader, &BagReader::bagLoaded, timeline, &Timeline::initialize);

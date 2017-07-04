@@ -53,10 +53,10 @@ void BagReader::loadBag(const std::__cxx11::string &path)
 
     rosbag::View bagview(bag_);
 
-    auto begin_time = bagview.getBeginTime();
-    auto end_time = bagview.getEndTime();
+    bag_begin_ = begin_ = bagview.getBeginTime();
+    bag_end_ = end_ = bagview.getEndTime();
 
-    emit bagLoaded(begin_time, end_time);
+    emit bagLoaded(bag_begin_, bag_end_);
 }
 
 void BagReader::processBag()
@@ -83,6 +83,7 @@ void BagReader::processBag()
 
             ros::Time const& time = m.getTime();
             emit timeUpdate(time);
+            emit durationUpdate(time - bag_begin_);
 
             ros::Time translated = time_translator_.translate(time);
             ros::WallTime horizon = ros::WallTime(translated.sec, translated.nsec);

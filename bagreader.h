@@ -36,14 +36,16 @@ public:
 
     Q_SLOT void processBag();
 
+    Q_SIGNAL void durationUpdate(ros::Duration time);
     Q_SIGNAL void timeUpdate(ros::Time time);
     Q_SLOT void setPlayTime(ros::Time time);
 
 private:
 
-    ros::Time begin_, end_;
     bool running_;
     bool restartProcess_;
+    ros::Time bag_begin_, bag_end_;
+    ros::Time begin_, end_; // might be different from bag_* if we are playing a subset of the bag
 
     float time_scale_;
 

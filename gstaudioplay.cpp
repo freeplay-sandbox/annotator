@@ -94,7 +94,7 @@ void GstAudioPlay::cb_newpad(GstElement *decodebin, GstPad *pad, gpointer data)
 
 void GstAudioPlay::cb_need_data(GstElement *appsrc, guint unused_size, gpointer user_data)
 {
-    qDebug() << "need-data signal emitted! Pausing the pipeline";
+    //qDebug() << "need-data signal emitted! Pausing the pipeline";
     GstAudioPlay *client = reinterpret_cast<GstAudioPlay*>(user_data);
     gst_element_set_state(GST_ELEMENT(client->_pipeline), GST_STATE_PAUSED);
     client->_paused = true;

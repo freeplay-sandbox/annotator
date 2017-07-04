@@ -17,8 +17,8 @@ using namespace std;
 Timeline::Timeline(QWidget *parent):
           _color_background(QColor("#393939")),
           _color_playhead(QColor("#FF2F00")),
-          _color_light(QColor("#2F2F2F")),
-          _color_dark(QColor("#292929")),
+          _color_light(QColor("#7F7F7F")),
+          _color_dark(QColor("#191919")),
           _color_null(QColor("#212121")),
           _color_bg_text(QColor("#a1a1a1")),
           _pen_playhead(QPen(QBrush(_color_playhead), 2)),
@@ -69,33 +69,30 @@ void Timeline::drawTimeline(QPainter *painter, const QRectF &rect) {
     auto bagLength = (end_ - begin_).toSec();
     auto elapsedTime = (current_ - begin_).toSec();
 
-    auto pxPerSec = (size().width() - 2 * margin) * 1.0/ bagLength;
+    auto pxPerSec = (right - left) * 1.0/ bagLength;
 
     // compute lines to draw and
     std::vector<QLine> lines_light;
+    int nbSec = 0;
     for (auto x = left; x <= right; x += pxPerSec * 60) {
-            lines_light.push_back(QLine(x, top, x, bottom));
-        //else
-        //    lines_dark.push_back(QLine(x, top, x, bottom));
+
+        lines_light.push_back(QLine(x, top, x, bottom + 5));
+        painter->drawText(QPoint(x + 5, bottom + 20), QString("%1:%2").arg(nbSec / 60,2,10,QChar('0')).arg(nbSec % 60,2,10,QChar('0')));
+
+        nbSec += 60;
     }
 
-    // nullspace lines
-    std::vector<QLine> lines_null;
-    lines_null.push_back(QLine(0, top, 0, bottom));
-    lines_null.push_back(QLine(left, 0, right, 0));
 
-    painter->fillRect(QRectF(left,top,right,bottom), _color_light);
+    painter->fillRect(QRectF(left,top,right,bottom), _color_background);
 
     // draw calls
-    painter->setPen(_pen_dark);
+    painter->setPen(_pen_light);
     painter->drawLines(lines_light.data(), lines_light.size());
 
-    painter->setPen(_pen_null);
-    painter->drawLines(lines_null.data(), lines_null.size());
 
     // playhead
     painter->setPen(_pen_playhead);
-    painter->drawLine(QLine(elapsedTime * pxPerSec, top, elapsedTime * pxPerSec, bottom + 2));
+    painter->drawLine(QLine(left + elapsedTime * pxPerSec, top, left + elapsedTime * pxPerSec, bottom));
 }
 
 void Timeline::keyPressEvent(QKeyEvent *event) {

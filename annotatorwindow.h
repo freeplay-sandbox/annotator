@@ -16,7 +16,9 @@ public:
     explicit AnnotatorWindow(QWidget *parent = 0);
     ~AnnotatorWindow();
 
-    Q_SLOT void showFPS(ros::Time time);
+    Q_SLOT void showBagInfo(ros::Duration time);
+
+    virtual void keyPressEvent(QKeyEvent* event) override;
 
 private:
     Ui::AnnotatorWindow *ui;
