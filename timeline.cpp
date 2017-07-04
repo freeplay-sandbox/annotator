@@ -18,20 +18,14 @@ Timeline::Timeline(QWidget *parent):
           timescale_(1.),
           _color_background(QColor("#393939")),
           _color_playhead(QColor("#FF2F00")),
-          _color_light(QColor("#7F7F7F")),
-          _color_dark(QColor("#191919")),
-          _color_null(QColor("#212121")),
+          _color_light(QColor("#7F7F7FAA")),
           _color_bg_text(QColor("#a1a1a1")),
           _pen_playhead(QPen(QBrush(_color_playhead), 2)),
           _pen_light(QPen(_color_light)),
-          _pen_dark(QPen(_color_dark)),
-          _pen_null(QPen(_color_null)),
           _brush_background(_color_background)
 {
     // initialize default pen settings
-    for (auto p : {&_pen_light, &_pen_dark, &_pen_null}) {
-        p->setWidth(0);
-    }
+    _pen_light.setWidth(0);
 }
 
 void Timeline::initialize(ros::Time begin, ros::Time end)
@@ -75,17 +69,35 @@ void Timeline::drawTimeline(QPainter *painter, const QRectF &rect) {
     auto bagLength = (end_ - begin_).toSec();
     auto elapsedTime = (current_ - begin_).toSec();
 
-    auto pxPerSec = (right - left) * 1.0/ bagLength;
+    double pxPerSec = (right - left) * 1.0/ bagLength * timescale_;
 
-    // compute lines to draw and
+    double visibleDuration = (right - left) / pxPerSec;
+
+    auto startTime = std::max(0., elapsedTime - visibleDuration  * 2./3);
+
+    double exactNbSecs = startTime;
+    int major_increment = 60; int minor_increment = 30;
+    if (pxPerSec > 2) {major_increment = 30; minor_increment = 10;}
+    if (pxPerSec > 3) {major_increment = 20; minor_increment = 5;}
+    if (pxPerSec > 7) {major_increment = 10; minor_increment = 2;}
+    if (pxPerSec > 30) {major_increment = 5; minor_increment = 1;}
+
+    // compute lines to draw
     std::vector<QLine> lines_light;
-    int nbSec = 0;
-    for (auto x = left; x <= right; x += pxPerSec * 60) {
+    std::vector<QLine> lines_dark;
+    for (double x = left; x <= right; x += pxPerSec * minor_increment) {
 
-        lines_light.push_back(QLine(x, top, x, bottom + 5));
-        painter->drawText(QPoint(x + 5, bottom + 20), QString("%1:%2").arg(nbSec / 60,2,10,QChar('0')).arg(nbSec % 60,2,10,QChar('0')));
+        int nbSecs = static_cast<int>(std::round(exactNbSecs));
 
-        nbSec += 60;
+        if(nbSecs % major_increment == 0) {
+            lines_light.push_back(QLine(x, top, x, bottom + 10));
+            painter->drawText(QPoint(x + 5, bottom + 20), QString("%1:%2").arg(nbSecs / 60,2,10,QChar('0')).arg(nbSecs % 60,2,10,QChar('0')));
+        }
+        else {
+           lines_dark.push_back(QLine(x, top, x, bottom));
+        }
+
+        exactNbSecs += minor_increment;
     }
 
     int generalAnnotationHeight = top + 10;
@@ -93,6 +105,8 @@ void Timeline::drawTimeline(QPainter *painter, const QRectF &rect) {
     int yellowAnnotationHeight = top + 50;
 
     painter->fillRect(QRectF(left,top,right,bottom), _color_background);
+
+    // annotation zones
     painter->fillRect(QRectF(left,generalAnnotationHeight - 5,right,10), _color_background.darker());
     painter->fillRect(QRectF(left,purpleAnnotationHeight - 5,right,10), QColor("#4c2d64"));
     painter->fillRect(QRectF(left,yellowAnnotationHeight - 5,right,10), QColor("#64592d"));
@@ -100,19 +114,21 @@ void Timeline::drawTimeline(QPainter *painter, const QRectF &rect) {
     // draw calls
     painter->setPen(_pen_light);
     painter->drawLines(lines_light.data(), lines_light.size());
+    painter->setPen(QPen(_color_light.darker()));
+    painter->drawLines(lines_dark.data(), lines_dark.size());
 
 
     // playhead
     painter->setPen(_pen_playhead);
-    painter->drawLine(QLine(left + elapsedTime * pxPerSec, top, left + elapsedTime * pxPerSec, bottom));
+    painter->drawLine(QLine(left + (elapsedTime - startTime) * pxPerSec, top, left + (elapsedTime - startTime) * pxPerSec, bottom));
 
 
     // Drawing of annotations
     int radius = 4;
 
     for(auto a : generalAnnotations) {
-        auto start = (a->start - begin_).toSec();
-        auto stop = (a->stop - begin_).toSec();
+        auto start = std::max(0., (a->start - begin_).toSec() - startTime);
+        auto stop = std::min((a->stop - begin_).toSec() - startTime, startTime + visibleDuration);
 
         painter->setPen(Annotation::Styles[a->type]);
         painter->setBrush(Annotation::Styles[a->type].brush());
@@ -120,8 +136,8 @@ void Timeline::drawTimeline(QPainter *painter, const QRectF &rect) {
         painter->drawLine(QLine(left + start * pxPerSec, generalAnnotationHeight, left + stop * pxPerSec, generalAnnotationHeight));
     }
    for(auto a : purpleAnnotations) {
-        auto start = (a->start - begin_).toSec();
-        auto stop = (a->stop - begin_).toSec();
+        auto start = std::max(0., (a->start - begin_).toSec() - startTime);
+        auto stop = std::min((a->stop - begin_).toSec() - startTime, startTime + visibleDuration);
 
         painter->setPen(Annotation::Styles[a->type]);
         painter->setBrush(Annotation::Styles[a->type].brush());
@@ -130,8 +146,8 @@ void Timeline::drawTimeline(QPainter *painter, const QRectF &rect) {
     }
 
     for(auto a : yellowAnnotations) {
-        auto start = (a->start - begin_).toSec();
-        auto stop = (a->stop - begin_).toSec();
+        auto start = std::max(0., (a->start - begin_).toSec() - startTime);
+        auto stop = std::min((a->stop - begin_).toSec() - startTime, startTime + visibleDuration);
 
         painter->setPen(Annotation::Styles[a->type]);
         painter->setBrush(Annotation::Styles[a->type].brush());
@@ -152,9 +168,11 @@ void Timeline::keyPressEvent(QKeyEvent *event) {
 
     case Qt::Key_Up:
         timescale_ *= 1.1;
+        if (timescale_ > 50.) timescale_ = 50.;
         break;
     case Qt::Key_Down:
         timescale_ *= 0.9;
+        if (timescale_ < 1.) timescale_ = 1.;
         break;
 
     case Qt::Key_Q:
@@ -211,5 +229,5 @@ void Timeline::mousePressEvent(QMouseEvent *event)
 
 ros::Time Timeline::pointToTimestamp(QPoint point) {
 
-    return begin_ + (end_ - begin_) * (point.x() * 1.0/size().width());
+    return begin_ + (end_ - begin_) * (point.x()/timescale_ * 1.0/size().width());
 }
