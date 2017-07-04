@@ -16,12 +16,15 @@ const string CAM_PURPLE("camera_purple/rgb/image_raw/compressed");
 const string CAM_YELLOW("camera_yellow/rgb/image_raw/compressed");
 const string CAM_ENV("env_camera/qhd/image_color/compressed");
 
-BagReader::BagReader(QObject *parent) : QObject(parent) {}
+BagReader::BagReader(QObject *parent) : QObject(parent), running(false) {}
 
-void BagReader::start(int cam) {
+void BagReader::start() {
+    running = true;
+    processBag();
 }
 
 void BagReader::stop() {
+    running = false;
 }
 
 void BagReader::loadBag(const std::__cxx11::string &path)
@@ -40,6 +43,8 @@ void BagReader::processBag()
 {
     for(rosbag::MessageInstance const m : bagview)
     {
+        if(!running) break;
+
         auto compressed_rgb = m.instantiate<sensor_msgs::CompressedImage>();
         if (compressed_rgb != NULL) {
             auto cvimg = cv::imdecode(compressed_rgb->data,1);

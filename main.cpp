@@ -73,10 +73,13 @@ int main(int argc, char *argv[])
 
     QObject::connect(&bagreader, &BagReader::started, [](){ qDebug() << "capture started"; });
 
-    //QMetaObject::invokeMethod(&capture, "start");
-    QMetaObject::invokeMethod(&bagreader, "processBag");
+    QObject::connect(&app, &QApplication::lastWindowClosed, [&](){bagreader.stop();});
+
+    QMetaObject::invokeMethod(&bagreader, "start");
+
 
     return app.exec();
+
 }
 
 //#include "main.moc"

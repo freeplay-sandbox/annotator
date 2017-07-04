@@ -16,7 +16,7 @@ class BagReader : public QObject
 public:
     BagReader(QObject * parent = {});
     Q_SIGNAL void started();
-    Q_SLOT void start(int cam = {});
+    Q_SLOT void start();
     Q_SLOT void stop();
 
     Q_SIGNAL void envImgReady(const cv::Mat &);
@@ -27,6 +27,8 @@ public:
     Q_SLOT void processBag();
 
 private:
+
+    bool running;
 
     rosbag::Bag bag;
     rosbag::View bagview;
