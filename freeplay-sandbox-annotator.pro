@@ -1,12 +1,4 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2017-07-03T20:25:40
-#
-#-------------------------------------------------
-
-QT       += core gui
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT       += core gui widgets
 
 TARGET = freeplay-sandbox-annotator
 TEMPLATE = app
@@ -23,14 +15,12 @@ SOURCES += main.cpp\
     bagreader.cpp \
     imageviewer.cpp \
     converter.cpp \
-    timeline.cpp \
-    timelineview.cpp
+    timeline.cpp
 
 HEADERS  += annotatorwindow.h \
     bagreader.h \
     imageviewer.h \
     converter.h \
-    timeline.hpp \
-    timelineview.hpp
+    timeline.hpp
 
 FORMS    += annotatorwindow.ui

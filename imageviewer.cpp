@@ -5,7 +5,11 @@
 
 void ImageViewer::paintEvent(QPaintEvent *) {
     QPainter p(this);
-    p.drawImage(0, 0, m_img.scaled(size(), Qt::KeepAspectRatio));
+
+    if(!m_img.isNull()) {
+        p.drawImage(0, 0, m_img.scaled(size(), Qt::KeepAspectRatio));
+    }
+
     m_img = {};
 }
 

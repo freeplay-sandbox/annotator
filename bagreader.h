@@ -29,7 +29,8 @@ public:
 
     Q_SLOT void processBag(ros::Time start=ros::TIME_MIN, ros::Time stop=ros::TIME_MAX);
 
-    Q_SIGNAL void timeUpdate(const QString& timeinfo);
+    Q_SIGNAL void timeUpdate(ros::Time time);
+    Q_SLOT void setPlayTime(ros::Time time);
 
 private:
 

@@ -13,7 +13,7 @@ AnnotatorWindow::~AnnotatorWindow()
     delete ui;
 }
 
-void AnnotatorWindow::showFPS(const QString &time)
+void AnnotatorWindow::showFPS(ros::Time time)
 {
-    ui->statusBar->showMessage(time);
+    ui->statusBar->showMessage(QString("Bag Time: %1").arg(time.toSec(),13, 'f', 1) + " sec");
 }

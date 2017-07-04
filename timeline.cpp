@@ -14,62 +14,69 @@ using namespace std;
 
 #include "timeline.hpp"
 
-Timeline::Timeline(QObject *parent)
-    : QGraphicsScene(parent),
-      dontGrabKeyPresses(false),
-      _paintBackground(true),
-      _color_background(QColor("#393939")),
-      _color_light(QColor("#2F2F2F")),
-      _color_dark(QColor("#292929")),
-      _color_null(QColor("#212121")),
-      _color_bg_text(QColor("#a1a1a1")),
-      _pen_light(QPen(_color_light)),
-      _pen_dark(QPen(_color_dark)),
-      _pen_null(QPen(_color_null)),
-      _brush_background(_color_background)
+Timeline::Timeline(QWidget *parent):
+          _color_background(QColor("#393939")),
+          _color_playhead(QColor("#FF2F00")),
+          _color_light(QColor("#2F2F2F")),
+          _color_dark(QColor("#292929")),
+          _color_null(QColor("#212121")),
+          _color_bg_text(QColor("#a1a1a1")),
+          _pen_playhead(QPen(QBrush(_color_playhead), 2)),
+          _pen_light(QPen(_color_light)),
+          _pen_dark(QPen(_color_dark)),
+          _pen_null(QPen(_color_null)),
+          _brush_background(_color_background)
 {
     // initialize default pen settings
     for (auto p : {&_pen_light, &_pen_dark, &_pen_null}) {
         p->setWidth(0);
     }
 
-    // initialize the background
-    setBackgroundBrush(_brush_background);
 
 }
 
-void Timeline::drawBackground(QPainter *painter, const QRectF &rect) {
+void Timeline::initialize(ros::Time begin, ros::Time end)
+{
+    begin_ = begin;
+    current_ = begin;
+    end_ = end;
+}
 
-    if(!_paintBackground) return;
+void Timeline::setPlayhead(ros::Time time)
+{
+   current_ = time;
+   update();
+}
 
-    // call parent method
-    QGraphicsScene::drawBackground(painter, rect);
+void Timeline::paintEvent(QPaintEvent *event)
+{
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
 
-    // augment the painted with grid
-    const int gridsize = 20;
+
+    drawTimeline(&painter, event->rect());
+
+}
+
+void Timeline::drawTimeline(QPainter *painter, const QRectF &rect) {
+
+    const int margin = 20;
     auto left = static_cast<int>(std::floor(rect.left()));
     auto right = static_cast<int>(std::ceil(rect.right()));
     auto top = static_cast<int>(std::floor(rect.top()));
-    auto bottom = static_cast<int>(std::ceil(rect.bottom()));
+    auto bottom = static_cast<int>(std::ceil(rect.bottom())) - 20;
 
-    // compute indices of lines to draw
-    const auto first_left = left - (left % gridsize);
-    const auto first_top = top - (top % gridsize);
+    auto bagLength = (end_ - begin_).toSec();
+    auto elapsedTime = (current_ - begin_).toSec();
+
+    auto pxPerSec = (size().width() - 2 * margin) * 1.0/ bagLength;
 
     // compute lines to draw and
     std::vector<QLine> lines_light;
-    std::vector<QLine> lines_dark;
-    for (auto x = first_left; x <= right; x += gridsize) {
-        if (x % 100 != 0)
+    for (auto x = left; x <= right; x += pxPerSec * 60) {
             lines_light.push_back(QLine(x, top, x, bottom));
-        else
-            lines_dark.push_back(QLine(x, top, x, bottom));
-    }
-    for (auto y = first_top; y <= bottom; y += gridsize) {
-        if (y % 100 != 0)
-            lines_light.push_back(QLine(left, y, right, y));
-        else
-            lines_dark.push_back(QLine(left, y, right, y));
+        //else
+        //    lines_dark.push_back(QLine(x, top, x, bottom));
     }
 
     // nullspace lines
@@ -77,33 +84,48 @@ void Timeline::drawBackground(QPainter *painter, const QRectF &rect) {
     lines_null.push_back(QLine(0, top, 0, bottom));
     lines_null.push_back(QLine(left, 0, right, 0));
 
-    // draw calls
-    painter->setPen(_pen_light);
-    painter->drawLines(lines_light.data(), lines_light.size());
+    painter->fillRect(QRectF(left,top,right,bottom), _color_light);
 
+    // draw calls
     painter->setPen(_pen_dark);
-    painter->drawLines(lines_dark.data(), lines_dark.size());
+    painter->drawLines(lines_light.data(), lines_light.size());
 
     painter->setPen(_pen_null);
     painter->drawLines(lines_null.data(), lines_null.size());
+
+    // playhead
+    painter->setPen(_pen_playhead);
+    painter->drawLine(QLine(elapsedTime * pxPerSec, top, elapsedTime * pxPerSec, bottom + 2));
 }
 
 void Timeline::keyPressEvent(QKeyEvent *event) {
-    if (dontGrabKeyPresses) {
-        QGraphicsScene::keyPressEvent(event);
-        return;
-    }
 
     switch (event->key()) {
-        ////// MISC DEBUG
-        case Qt::Key_Enter:
-        case Qt::Key_Return:
-            cout << "Hello" << endl;
-            QGraphicsScene::keyPressEvent(event);
-            break;
+    ////// MISC DEBUG
+    case Qt::Key_Enter:
+    case Qt::Key_Return:
+        cout << "Hello" << endl;
+        QWidget::keyPressEvent(event);
+        break;
 
         ////// NOT HANDLED -> pass forward
-        default:
-            QGraphicsScene::keyPressEvent(event);
+    default:
+        QWidget::keyPressEvent(event);
     }
+}
+
+void Timeline::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton) {
+            auto lastPoint = event->pos();
+            emit timeJump(pointToTimestamp(lastPoint));
+    }
+}
+
+ros::Time Timeline::pointToTimestamp(QPoint point) {
+
+    auto time = begin_ + (end_ - begin_) * (point.x() * 1.0/size().width());
+
+    qDebug() << QString("Playhead time: %1").arg(time.toSec(),13, 'f', 1) << " sec";
+    return time;
 }

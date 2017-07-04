@@ -3,15 +3,16 @@
 
 #include <QtWidgets>
 #include <opencv2/opencv.hpp>
+#include <ros/time.h>
 
 #include "annotatorwindow.h"
 #include "bagreader.h"
 #include "imageviewer.h"
 #include "converter.h"
 #include "timeline.hpp"
-#include "timelineview.hpp"
 
 Q_DECLARE_METATYPE(cv::Mat)
+Q_DECLARE_METATYPE(ros::Time)
 
 using namespace std;
 
@@ -20,20 +21,13 @@ class Thread final : public QThread { public: ~Thread() { quit(); wait(); } };
 int main(int argc, char *argv[])
 {
     qRegisterMetaType<cv::Mat>();
+    qRegisterMetaType<ros::Time>();
+
     QApplication app(argc, argv);
 
     AnnotatorWindow aw;
 
-    // create and configure timeline
-    auto timeline = make_shared<Timeline>();
-
-
-    timeline->setSceneRect(-32000, -32000, 64000, 64000);
-
-
-    TimelineView *timelineView = aw.findChild<TimelineView*>("timeline");
-
-    timelineView->setScene(timeline.get());
+    Timeline *timeline = aw.findChild<Timeline*>("timeline");
 
     ImageViewer *envView = aw.findChild<ImageViewer*>("envView");
     ImageViewer *purpleView = aw.findChild<ImageViewer*>("purpleView");
@@ -68,14 +62,19 @@ int main(int argc, char *argv[])
     QObject::connect(&bagreader, &BagReader::yellowImgReady, &yellowConverter, &Converter::processFrame);
     QObject::connect(&yellowConverter, &Converter::imageReady, yellowView, &ImageViewer::setImage);
 
-    aw.showFPS("Loading bag...");
-    aw.showFullScreen();
+    //aw.showFullScreen();
+    aw.show();
 
-    QObject::connect(&bagreader, &BagReader::started, [](){ qDebug() << "capture started"; });
+    QObject::connect(&bagreader, &BagReader::started, [](){ qDebug() << "Starting to play the bag file"; });
 
     QObject::connect(&app, &QApplication::lastWindowClosed, [&](){bagreader.stop();});
 
     QObject::connect(&bagreader, &BagReader::timeUpdate, &aw, &AnnotatorWindow::showFPS);
+    QObject::connect(&bagreader, &BagReader::timeUpdate, timeline, &Timeline::setPlayhead);
+
+    QObject::connect(&bagreader, &BagReader::bagLoaded, timeline, &Timeline::initialize);
+
+    QObject::connect(timeline, &Timeline::timeJump, &bagreader, &BagReader::setPlayTime);
 
     bagreader.loadBag("/home/slemaignan/freeplay_sandox/data/2017-06-13-102226367218/freeplay.bag");
 

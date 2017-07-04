@@ -2,6 +2,7 @@
 #define ANNOTATORWINDOW_H
 
 #include <QMainWindow>
+#include <ros/time.h>
 
 namespace Ui {
 class AnnotatorWindow;
@@ -15,7 +16,7 @@ public:
     explicit AnnotatorWindow(QWidget *parent = 0);
     ~AnnotatorWindow();
 
-    Q_SLOT void showFPS(const QString& time);
+    Q_SLOT void showFPS(ros::Time time);
 
 private:
     Ui::AnnotatorWindow *ui;

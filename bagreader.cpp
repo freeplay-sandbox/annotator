@@ -30,6 +30,7 @@ BagReader::BagReader(QObject *parent) :
 void BagReader::start() {
     running_ = true;
     processBag();
+    emit started();
 }
 
 void BagReader::stop() {
@@ -70,12 +71,10 @@ void BagReader::processBag(ros::Time start, ros::Time stop)
         if(!running_) break;
 
         ros::Time const& time = m.getTime();
-        emit timeUpdate(QString("Bag Time: %1").arg(time.toSec(),13, 'f', 1) + " sec");
+        emit timeUpdate(time);
 
         ros::Time translated = time_translator_.translate(time);
         ros::WallTime horizon = ros::WallTime(translated.sec, translated.nsec);
-
-        ros::WallDuration shift = horizon - ros::WallTime::now();
         ros::WallTime::sleepUntil(horizon);
 
 
@@ -89,5 +88,10 @@ void BagReader::processBag(ros::Time start, ros::Time stop)
         }
     }
 
+}
+
+void BagReader::setPlayTime(ros::Time time)
+{
+    qDebug() << QString("Setting playhead to: %1").arg(time.toSec(),13, 'f', 1) << " sec";
 }
 

@@ -1,38 +1,50 @@
-#ifndef __GRAPHICSNODESCENE_HPP__7F9E4C1E_8F4E_4BD2_BDF7_3D4ECEC206B5
-#define __GRAPHICSNODESCENE_HPP__7F9E4C1E_8F4E_4BD2_BDF7_3D4ECEC206B5
+#ifndef _TIMELINE_HPP
+#define _TIMELINE_HPP
 
 #include <set>
 #include <memory>
 
-#include <QGraphicsScene>
+#include <QWidget>
+#include <QPen>
 
-class Timeline : public QGraphicsScene {
+#include <ros/time.h>
+
+class Timeline : public QWidget {
     Q_OBJECT
 
    public:
-    Timeline(QObject* parent = 0);
+    Timeline(QWidget* parent = nullptr);
 
-    bool dontGrabKeyPresses;
+    Q_SIGNAL void timeJump(ros::Time timepoint);
+
+    Q_SLOT void initialize(ros::Time begin, ros::Time end);
+    Q_SLOT void setPlayhead(ros::Time time);
 
    protected:
-    virtual void drawBackground(QPainter* painter, const QRectF& rect) override;
+    virtual void paintEvent(QPaintEvent *event) override;
     virtual void keyPressEvent(QKeyEvent* event) override;
+    virtual void mousePressEvent(QMouseEvent* event) override;
 
    private:
+
+    ros::Time begin_, end_, current_;
+
     QColor _color_background;
+    QColor _color_playhead;
     QColor _color_light;
     QColor _color_dark;
     QColor _color_null;
     QColor _color_bg_text;
 
-    bool _paintBackground;
-
+    QPen _pen_playhead;
     QPen _pen_light;
     QPen _pen_dark;
     QPen _pen_null;
 
     QBrush _brush_background;
 
+    void drawTimeline(QPainter *painter, const QRectF &rect);
+    ros::Time pointToTimestamp(QPoint point);
 };
 
-#endif /* __GRAPHICSNODESCENE_HPP__7F9E4C1E_8F4E_4BD2_BDF7_3D4ECEC206B5 */
+#endif
