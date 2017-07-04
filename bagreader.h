@@ -6,7 +6,7 @@
 #include <QBasicTimer>
 
 #include <rosbag/bag.h>
-#include <rosbag/view.h>
+#include <rosbag/time_translator.h>
 
 class BagReader : public QObject
 {
@@ -24,14 +24,22 @@ public:
     Q_SIGNAL void yellowImgReady(const cv::Mat &);
 
     void loadBag(const std::string& path);
-    Q_SLOT void processBag();
+
+    Q_SIGNAL void bagLoaded(ros::Time start, ros::Time end);
+
+    Q_SLOT void processBag(ros::Time start=ros::TIME_MIN, ros::Time stop=ros::TIME_MAX);
+
+    Q_SIGNAL void timeUpdate(const QString& timeinfo);
 
 private:
 
-    bool running;
+    bool running_;
 
-    rosbag::Bag bag;
-    rosbag::View bagview;
+    float time_scale_;
+
+    rosbag::TimeTranslator time_translator_;
+
+    rosbag::Bag bag_;
 
 
 };

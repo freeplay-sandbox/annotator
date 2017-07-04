@@ -12,3 +12,8 @@ AnnotatorWindow::~AnnotatorWindow()
 {
     delete ui;
 }
+
+void AnnotatorWindow::showFPS(const QString &time)
+{
+    ui->statusBar->showMessage(time);
+}

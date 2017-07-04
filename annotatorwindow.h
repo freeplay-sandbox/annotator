@@ -15,6 +15,8 @@ public:
     explicit AnnotatorWindow(QWidget *parent = 0);
     ~AnnotatorWindow();
 
+    Q_SLOT void showFPS(const QString& time);
+
 private:
     Ui::AnnotatorWindow *ui;
 };

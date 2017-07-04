@@ -42,7 +42,6 @@ int main(int argc, char *argv[])
 
 
     BagReader bagreader;
-    bagreader.loadBag("/home/skadge//freeplay_sandox/data/2017-05-18-145157833880/freeplay.bag");
     Thread captureThread, envConverterThread, purpleConverterThread, yellowConverterThread;
     // Everything runs at the same priority as the gui, so it won't supply useless frames.
     envConverter.setProcessAll(false);
@@ -69,11 +68,16 @@ int main(int argc, char *argv[])
     QObject::connect(&bagreader, &BagReader::yellowImgReady, &yellowConverter, &Converter::processFrame);
     QObject::connect(&yellowConverter, &Converter::imageReady, yellowView, &ImageViewer::setImage);
 
+    aw.showFPS("Loading bag...");
     aw.showFullScreen();
 
     QObject::connect(&bagreader, &BagReader::started, [](){ qDebug() << "capture started"; });
 
     QObject::connect(&app, &QApplication::lastWindowClosed, [&](){bagreader.stop();});
+
+    QObject::connect(&bagreader, &BagReader::timeUpdate, &aw, &AnnotatorWindow::showFPS);
+
+    bagreader.loadBag("/home/slemaignan/freeplay_sandox/data/2017-06-13-102226367218/freeplay.bag");
 
     QMetaObject::invokeMethod(&bagreader, "start");
 
