@@ -23,6 +23,7 @@ public:
     Q_SIGNAL void envImgReady(const cv::Mat &);
     Q_SIGNAL void purpleImgReady(const cv::Mat &);
     Q_SIGNAL void yellowImgReady(const cv::Mat &);
+    Q_SIGNAL void sandtrayImgReady(const cv::Mat &);
     Q_SIGNAL void audioFrameReady(const audio_common_msgs::AudioDataConstPtr&);
 
     void loadBag(const std::string& path);

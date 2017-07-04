@@ -18,6 +18,7 @@ const string AUDIO_PURPLE("camera_purple/audio");
 const string CAM_PURPLE("camera_purple/rgb/image_raw/compressed");
 const string CAM_YELLOW("camera_yellow/rgb/image_raw/compressed");
 const string CAM_ENV("env_camera/qhd/image_color/compressed");
+const string SANDTRAY_BG("/sandtray/background/image/compressed");
 
 BagReader::BagReader(QObject *parent) :
     QObject(parent),
@@ -55,7 +56,7 @@ void BagReader::loadBag(const std::__cxx11::string &path)
 
 void BagReader::processBag(ros::Time start, ros::Time stop)
 {
-    vector<string> topics = {AUDIO_PURPLE, CAM_ENV, CAM_PURPLE, CAM_YELLOW};
+    vector<string> topics = {AUDIO_PURPLE, CAM_ENV, CAM_PURPLE, CAM_YELLOW, SANDTRAY_BG};
 
     rosbag::View view;
     view.addQuery(bag_, rosbag::TopicQuery(topics), start, stop);
@@ -92,6 +93,7 @@ void BagReader::processBag(ros::Time start, ros::Time stop)
                 if(m.getTopic() == CAM_ENV) emit envImgReady(cvimg);
                 else if(m.getTopic() == CAM_PURPLE) emit purpleImgReady(cvimg);
                 else if(m.getTopic() == CAM_YELLOW) emit yellowImgReady(cvimg);
+                else if(m.getTopic() == SANDTRAY_BG) emit sandtrayImgReady(cvimg);
             }
         }
     }

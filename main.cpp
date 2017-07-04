@@ -40,15 +40,17 @@ int main(int argc, char *argv[])
     ImageViewer *envView = aw.findChild<ImageViewer*>("envView");
     ImageViewer *purpleView = aw.findChild<ImageViewer*>("purpleView");
     ImageViewer *yellowView = aw.findChild<ImageViewer*>("yellowView");
-    Converter envConverter, purpleConverter, yellowConverter;
+    ImageViewer *sandtrayView = aw.findChild<ImageViewer*>("sandtrayView");
+    Converter envConverter, purpleConverter, yellowConverter, sandtrayConverter;
 
 
     BagReader bagreader;
-    Thread captureThread, envConverterThread, purpleConverterThread, yellowConverterThread;
+    Thread captureThread, envConverterThread, purpleConverterThread, yellowConverterThread, sandtrayConverterThread;
     // Everything runs at the same priority as the gui, so it won't supply useless frames.
     envConverter.setProcessAll(false);
     purpleConverter.setProcessAll(false);
     yellowConverter.setProcessAll(false);
+    sandtrayConverter.setProcessAll(false);
 
     captureThread.start();
     bagreader.moveToThread(&captureThread);
@@ -56,10 +58,12 @@ int main(int argc, char *argv[])
     envConverterThread.start();
     purpleConverterThread.start();
     yellowConverterThread.start();
+    sandtrayConverterThread.start();
 
     envConverter.moveToThread(&envConverterThread);
     purpleConverter.moveToThread(&purpleConverterThread);
     yellowConverter.moveToThread(&yellowConverterThread);
+    sandtrayConverter.moveToThread(&sandtrayConverterThread);
 
     QObject::connect(&bagreader, &BagReader::envImgReady, &envConverter, &Converter::processFrame);
     QObject::connect(&envConverter, &Converter::imageReady, envView, &ImageViewer::setImage);
@@ -69,6 +73,9 @@ int main(int argc, char *argv[])
 
     QObject::connect(&bagreader, &BagReader::yellowImgReady, &yellowConverter, &Converter::processFrame);
     QObject::connect(&yellowConverter, &Converter::imageReady, yellowView, &ImageViewer::setImage);
+
+    QObject::connect(&bagreader, &BagReader::sandtrayImgReady, &sandtrayConverter, &Converter::processFrame);
+    QObject::connect(&sandtrayConverter, &Converter::imageReady, sandtrayView, &ImageViewer::setImage);
 
     QObject::connect(&bagreader, &BagReader::audioFrameReady, &gstAudioPlayer, &GstAudioPlay::audioMsgReady);
 
