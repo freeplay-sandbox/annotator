@@ -32,7 +32,6 @@ Timeline::Timeline(QWidget *parent):
         p->setWidth(0);
     }
 
-
 }
 
 void Timeline::initialize(ros::Time begin, ros::Time end)
@@ -44,6 +43,11 @@ void Timeline::initialize(ros::Time begin, ros::Time end)
 
 void Timeline::setPlayhead(ros::Time time)
 {
+
+    if (!purpleAnnotations.empty()) {
+        std::get<2>(purpleAnnotations.back()) = time;
+    }
+
    current_ = time;
    update();
 }
@@ -93,6 +97,23 @@ void Timeline::drawTimeline(QPainter *painter, const QRectF &rect) {
     // playhead
     painter->setPen(_pen_playhead);
     painter->drawLine(QLine(left + elapsedTime * pxPerSec, top, left + elapsedTime * pxPerSec, bottom));
+
+
+    int radius = 4;
+    int annotationHeight = top + 20;
+
+    for(auto annotation : purpleAnnotations) {
+        auto type = std::get<0>(annotation);
+        auto start = (std::get<1>(annotation) - begin_).toSec();
+        auto stop = (std::get<2>(annotation) - begin_).toSec();
+
+        painter->setPen(_pen_playhead);
+        painter->drawEllipse(left - radius/2 + start * pxPerSec, annotationHeight - radius/2, radius,radius);
+        painter->drawEllipse(left + radius/2 + stop * pxPerSec, annotationHeight - radius/2, radius, radius);
+        painter->drawLine(QLine(left + start * pxPerSec, annotationHeight, left + stop * pxPerSec, annotationHeight));
+
+
+    }
 }
 
 void Timeline::keyPressEvent(QKeyEvent *event) {
@@ -105,6 +126,11 @@ void Timeline::keyPressEvent(QKeyEvent *event) {
         QWidget::keyPressEvent(event);
         break;
 
+    case Qt::Key_H:
+        qDebug() << "Annotating an HOSTILE behaviour";
+        purpleAnnotations.push_back(std::make_tuple(AnnotationType::HOSTILE, current_, current_));
+        QWidget::keyPressEvent(event);
+        break;
         ////// NOT HANDLED -> pass forward
     default:
         QWidget::keyPressEvent(event);

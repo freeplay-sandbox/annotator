@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
     AnnotatorWindow aw;
 
     Timeline *timeline = aw.findChild<Timeline*>("timeline");
+    timeline->setFocus();
 
     ImageViewer *envView = aw.findChild<ImageViewer*>("envView");
     ImageViewer *purpleView = aw.findChild<ImageViewer*>("purpleView");
