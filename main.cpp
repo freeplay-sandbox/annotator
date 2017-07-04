@@ -4,15 +4,18 @@
 #include <QtWidgets>
 #include <opencv2/opencv.hpp>
 #include <ros/time.h>
+#include <audio_common_msgs/AudioData.h>
 
 #include "annotatorwindow.h"
 #include "bagreader.h"
 #include "imageviewer.h"
 #include "converter.h"
 #include "timeline.hpp"
+#include <gstaudioplay.h>
 
 Q_DECLARE_METATYPE(cv::Mat)
 Q_DECLARE_METATYPE(ros::Time)
+Q_DECLARE_METATYPE(audio_common_msgs::AudioDataConstPtr)
 
 using namespace std;
 
@@ -22,8 +25,13 @@ int main(int argc, char *argv[])
 {
     qRegisterMetaType<cv::Mat>();
     qRegisterMetaType<ros::Time>();
+    qRegisterMetaType<audio_common_msgs::AudioDataConstPtr>();
 
     QApplication app(argc, argv);
+
+    gst_init(&argc, &argv);
+
+    GstAudioPlay gstAudioPlayer;
 
     AnnotatorWindow aw;
 
@@ -61,6 +69,8 @@ int main(int argc, char *argv[])
 
     QObject::connect(&bagreader, &BagReader::yellowImgReady, &yellowConverter, &Converter::processFrame);
     QObject::connect(&yellowConverter, &Converter::imageReady, yellowView, &ImageViewer::setImage);
+
+    QObject::connect(&bagreader, &BagReader::audioFrameReady, &gstAudioPlayer, &GstAudioPlay::audioMsgReady);
 
     //aw.showFullScreen();
     aw.show();

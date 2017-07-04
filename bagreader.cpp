@@ -14,6 +14,7 @@
 
 using namespace std;
 
+const string AUDIO_PURPLE("camera_purple/audio");
 const string CAM_PURPLE("camera_purple/rgb/image_raw/compressed");
 const string CAM_YELLOW("camera_yellow/rgb/image_raw/compressed");
 const string CAM_ENV("env_camera/qhd/image_color/compressed");
@@ -54,7 +55,7 @@ void BagReader::loadBag(const std::__cxx11::string &path)
 
 void BagReader::processBag(ros::Time start, ros::Time stop)
 {
-    vector<string> topics = {CAM_ENV, CAM_PURPLE, CAM_YELLOW};
+    vector<string> topics = {AUDIO_PURPLE, CAM_ENV, CAM_PURPLE, CAM_YELLOW};
 
     rosbag::View view;
     view.addQuery(bag_, rosbag::TopicQuery(topics), start, stop);
@@ -77,14 +78,21 @@ void BagReader::processBag(ros::Time start, ros::Time stop)
         ros::WallTime horizon = ros::WallTime(translated.sec, translated.nsec);
         ros::WallTime::sleepUntil(horizon);
 
+        if(m.getTopic() == AUDIO_PURPLE) {
+            auto msg = m.instantiate<audio_common_msgs::AudioData>();
 
-        auto compressed_rgb = m.instantiate<sensor_msgs::CompressedImage>();
-        if (compressed_rgb != NULL) {
-            auto cvimg = cv::imdecode(compressed_rgb->data,1);
+            emit audioFrameReady(msg);
 
-            if(m.getTopic() == CAM_ENV) emit envImgReady(cvimg);
-            else if(m.getTopic() == CAM_PURPLE) emit purpleImgReady(cvimg);
-            else if(m.getTopic() == CAM_YELLOW) emit yellowImgReady(cvimg);
+        }
+        else {
+            auto compressed_rgb = m.instantiate<sensor_msgs::CompressedImage>();
+            if (compressed_rgb != NULL) {
+                auto cvimg = cv::imdecode(compressed_rgb->data,1);
+
+                if(m.getTopic() == CAM_ENV) emit envImgReady(cvimg);
+                else if(m.getTopic() == CAM_PURPLE) emit purpleImgReady(cvimg);
+                else if(m.getTopic() == CAM_YELLOW) emit yellowImgReady(cvimg);
+            }
         }
     }
 
