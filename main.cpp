@@ -84,8 +84,8 @@ int main(int argc, char *argv[])
 
     QObject::connect(&bagreader, &BagReader::audioFrameReady, &gstAudioPlayer, &GstAudioPlay::audioMsgReady);
 
-    //aw.showFullScreen();
-    aw.show();
+    aw.showFullScreen();
+    //aw.show();
 
     QObject::connect(&bagreader, &BagReader::started, [](){ qDebug() << "Starting to play the bag file"; });
 
@@ -98,7 +98,8 @@ int main(int argc, char *argv[])
 
     QObject::connect(timeline, &Timeline::timeJump, &bagreader, &BagReader::setPlayTime);
 
-    bagreader.loadBag("/home/slemaignan/freeplay_sandox/data/2017-06-13-102226367218/freeplay.bag");
+    //bagreader.loadBag("/home/slemaignan/freeplay_sandox/data/2017-06-13-102226367218/freeplay.bag");
+    bagreader.loadBag("/home/skadge/freeplay_sandox/data/2017-05-18-145157833880/freeplay.bag");
 
     QMetaObject::invokeMethod(&bagreader, "start");
 

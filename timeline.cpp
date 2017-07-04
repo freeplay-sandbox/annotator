@@ -15,6 +15,7 @@ using namespace std;
 #include "timeline.hpp"
 
 Timeline::Timeline(QWidget *parent):
+          timescale_(1.),
           _color_background(QColor("#393939")),
           _color_playhead(QColor("#FF2F00")),
           _color_light(QColor("#7F7F7F")),
@@ -31,7 +32,6 @@ Timeline::Timeline(QWidget *parent):
     for (auto p : {&_pen_light, &_pen_dark, &_pen_null}) {
         p->setWidth(0);
     }
-
 }
 
 void Timeline::initialize(ros::Time begin, ros::Time end)
@@ -39,14 +39,16 @@ void Timeline::initialize(ros::Time begin, ros::Time end)
     begin_ = begin;
     current_ = begin;
     end_ = end;
+
+    purpleAnnotations.add({AnnotationType::PASSIVE, current_, current_});
+    yellowAnnotations.add({AnnotationType::PASSIVE, current_, current_});
 }
 
 void Timeline::setPlayhead(ros::Time time)
 {
 
-    if (!purpleAnnotations.empty()) {
-        std::get<2>(purpleAnnotations.back()) = time;
-    }
+   purpleAnnotations.updateCurrentAnnotationEnd(time);
+   yellowAnnotations.updateCurrentAnnotationEnd(time);
 
    current_ = time;
    update();
@@ -86,8 +88,14 @@ void Timeline::drawTimeline(QPainter *painter, const QRectF &rect) {
         nbSec += 60;
     }
 
+    int generalAnnotationHeight = top + 10;
+    int purpleAnnotationHeight = top + 30;
+    int yellowAnnotationHeight = top + 50;
 
     painter->fillRect(QRectF(left,top,right,bottom), _color_background);
+    painter->fillRect(QRectF(left,generalAnnotationHeight - 5,right,10), _color_background.darker());
+    painter->fillRect(QRectF(left,purpleAnnotationHeight - 5,right,10), QColor("#4c2d64"));
+    painter->fillRect(QRectF(left,yellowAnnotationHeight - 5,right,10), QColor("#64592d"));
 
     // draw calls
     painter->setPen(_pen_light);
@@ -99,20 +107,36 @@ void Timeline::drawTimeline(QPainter *painter, const QRectF &rect) {
     painter->drawLine(QLine(left + elapsedTime * pxPerSec, top, left + elapsedTime * pxPerSec, bottom));
 
 
+    // Drawing of annotations
     int radius = 4;
-    int annotationHeight = top + 20;
 
-    for(auto annotation : purpleAnnotations) {
-        auto type = std::get<0>(annotation);
-        auto start = (std::get<1>(annotation) - begin_).toSec();
-        auto stop = (std::get<2>(annotation) - begin_).toSec();
+    for(auto a : generalAnnotations) {
+        auto start = (a->start - begin_).toSec();
+        auto stop = (a->stop - begin_).toSec();
 
-        painter->setPen(_pen_playhead);
-        painter->drawEllipse(left - radius/2 + start * pxPerSec, annotationHeight - radius/2, radius,radius);
-        painter->drawEllipse(left + radius/2 + stop * pxPerSec, annotationHeight - radius/2, radius, radius);
-        painter->drawLine(QLine(left + start * pxPerSec, annotationHeight, left + stop * pxPerSec, annotationHeight));
+        painter->setPen(Annotation::Styles[a->type]);
+        painter->setBrush(Annotation::Styles[a->type].brush());
+        painter->drawEllipse(left - radius/2 + start * pxPerSec, generalAnnotationHeight - radius/2, radius,radius);
+        painter->drawLine(QLine(left + start * pxPerSec, generalAnnotationHeight, left + stop * pxPerSec, generalAnnotationHeight));
+    }
+   for(auto a : purpleAnnotations) {
+        auto start = (a->start - begin_).toSec();
+        auto stop = (a->stop - begin_).toSec();
 
+        painter->setPen(Annotation::Styles[a->type]);
+        painter->setBrush(Annotation::Styles[a->type].brush());
+        painter->drawEllipse(left - radius/2 + start * pxPerSec, purpleAnnotationHeight - radius/2, radius,radius);
+        painter->drawLine(QLine(left + start * pxPerSec, purpleAnnotationHeight, left + stop * pxPerSec, purpleAnnotationHeight));
+    }
 
+    for(auto a : yellowAnnotations) {
+        auto start = (a->start - begin_).toSec();
+        auto stop = (a->stop - begin_).toSec();
+
+        painter->setPen(Annotation::Styles[a->type]);
+        painter->setBrush(Annotation::Styles[a->type].brush());
+        painter->drawEllipse(left - radius/2 + start * pxPerSec, yellowAnnotationHeight - radius/2, radius,radius);
+        painter->drawLine(QLine(left + start * pxPerSec, yellowAnnotationHeight, left + stop * pxPerSec, yellowAnnotationHeight));
     }
 }
 
@@ -126,11 +150,51 @@ void Timeline::keyPressEvent(QKeyEvent *event) {
         QWidget::keyPressEvent(event);
         break;
 
-    case Qt::Key_H:
-        qDebug() << "Annotating an HOSTILE behaviour";
-        purpleAnnotations.push_back(std::make_tuple(AnnotationType::HOSTILE, current_, current_));
-        QWidget::keyPressEvent(event);
+    case Qt::Key_Up:
+        timescale_ *= 1.1;
         break;
+    case Qt::Key_Down:
+        timescale_ *= 0.9;
+        break;
+
+    case Qt::Key_Q:
+        purpleAnnotations.add({AnnotationType::PROSOCIAL, current_, current_});
+        break;
+    case Qt::Key_W:
+        purpleAnnotations.add({AnnotationType::HOSTILE, current_, current_});
+        break;
+    case Qt::Key_E:
+        purpleAnnotations.add({AnnotationType::ASSERTIVE, current_, current_});
+        break;
+    case Qt::Key_A:
+        purpleAnnotations.add({AnnotationType::PASSIVE, current_, current_});
+        break;
+    case Qt::Key_S:
+        purpleAnnotations.add({AnnotationType::ADULTSEEKING, current_, current_});
+        break;
+     case Qt::Key_D:
+        purpleAnnotations.add({AnnotationType::IRRELEVANT, current_, current_});
+        break;
+
+    case Qt::Key_U:
+        yellowAnnotations.add({AnnotationType::PROSOCIAL, current_, current_});
+        break;
+    case Qt::Key_I:
+        yellowAnnotations.add({AnnotationType::HOSTILE, current_, current_});
+        break;
+    case Qt::Key_O:
+        yellowAnnotations.add({AnnotationType::ASSERTIVE, current_, current_});
+        break;
+    case Qt::Key_J:
+        yellowAnnotations.add({AnnotationType::PASSIVE, current_, current_});
+        break;
+    case Qt::Key_K:
+        yellowAnnotations.add({AnnotationType::ADULTSEEKING, current_, current_});
+        break;
+     case Qt::Key_L:
+        yellowAnnotations.add({AnnotationType::IRRELEVANT, current_, current_});
+        break;
+
         ////// NOT HANDLED -> pass forward
     default:
         QWidget::keyPressEvent(event);

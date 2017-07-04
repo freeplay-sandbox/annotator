@@ -16,13 +16,15 @@ SOURCES += main.cpp\
     imageviewer.cpp \
     converter.cpp \
     timeline.cpp \
-    gstaudioplay.cpp
+    gstaudioplay.cpp \
+    annotation.cpp
 
 HEADERS  += annotatorwindow.h \
     bagreader.h \
     imageviewer.h \
     converter.h \
     timeline.hpp \
-    gstaudioplay.h
+    gstaudioplay.h \
+    annotation.h
 
 FORMS    += annotatorwindow.ui

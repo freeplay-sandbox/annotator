@@ -9,9 +9,7 @@
 
 #include <ros/time.h>
 
-enum class AnnotationType {HOSTILE, PROSOCIAL, ASSERTIVE, PASSIVE, ADULTSEEKING, IRRELEVANT};
-
-typedef std::tuple<AnnotationType, ros::Time, ros::Time> Annotation;
+#include "annotation.h"
 
 class Timeline : public QWidget {
     Q_OBJECT
@@ -30,6 +28,8 @@ class Timeline : public QWidget {
     virtual void mousePressEvent(QMouseEvent* event) override;
 
    private:
+
+    double timescale_;
 
     ros::Time begin_, end_, current_;
 
@@ -50,7 +50,9 @@ class Timeline : public QWidget {
     void drawTimeline(QPainter *painter, const QRectF &rect);
     ros::Time pointToTimestamp(QPoint point);
 
-    std::vector<Annotation> purpleAnnotations;
+    Annotations generalAnnotations;
+    Annotations purpleAnnotations;
+    Annotations yellowAnnotations;
 };
 
 #endif
