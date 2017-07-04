@@ -1,9 +1,13 @@
 #ifndef BAGREADER_H
 #define BAGREADER_H
 
+#include <mutex>
+#include <condition_variable>
+
 #include <opencv2/opencv.hpp>
 #include <QObject>
 #include <QBasicTimer>
+
 
 #include <rosbag/bag.h>
 #include <rosbag/time_translator.h>
@@ -30,21 +34,22 @@ public:
 
     Q_SIGNAL void bagLoaded(ros::Time start, ros::Time end);
 
-    Q_SLOT void processBag(ros::Time start=ros::TIME_MIN, ros::Time stop=ros::TIME_MAX);
+    Q_SLOT void processBag();
 
     Q_SIGNAL void timeUpdate(ros::Time time);
     Q_SLOT void setPlayTime(ros::Time time);
 
 private:
 
+    ros::Time begin_, end_;
     bool running_;
+    bool restartProcess_;
 
     float time_scale_;
 
     rosbag::TimeTranslator time_translator_;
 
     rosbag::Bag bag_;
-
 
 };
 

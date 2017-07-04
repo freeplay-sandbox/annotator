@@ -45,15 +45,17 @@ int main(int argc, char *argv[])
 
 
     BagReader bagreader;
-    Thread captureThread, envConverterThread, purpleConverterThread, yellowConverterThread, sandtrayConverterThread;
+    Thread bagReadingThread, envConverterThread, purpleConverterThread, yellowConverterThread, sandtrayConverterThread;
     // Everything runs at the same priority as the gui, so it won't supply useless frames.
     envConverter.setProcessAll(false);
     purpleConverter.setProcessAll(false);
     yellowConverter.setProcessAll(false);
     sandtrayConverter.setProcessAll(false);
 
-    captureThread.start();
-    bagreader.moveToThread(&captureThread);
+    bagReadingThread.start();
+
+
+    bagreader.moveToThread(&bagReadingThread);
 
     envConverterThread.start();
     purpleConverterThread.start();
@@ -96,7 +98,6 @@ int main(int argc, char *argv[])
     bagreader.loadBag("/home/slemaignan/freeplay_sandox/data/2017-06-13-102226367218/freeplay.bag");
 
     QMetaObject::invokeMethod(&bagreader, "start");
-
 
     return app.exec();
 

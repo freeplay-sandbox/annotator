@@ -124,8 +124,5 @@ void Timeline::mousePressEvent(QMouseEvent *event)
 
 ros::Time Timeline::pointToTimestamp(QPoint point) {
 
-    auto time = begin_ + (end_ - begin_) * (point.x() * 1.0/size().width());
-
-    qDebug() << QString("Playhead time: %1").arg(time.toSec(),13, 'f', 1) << " sec";
-    return time;
+    return begin_ + (end_ - begin_) * (point.x() * 1.0/size().width());
 }

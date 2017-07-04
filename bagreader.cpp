@@ -3,6 +3,7 @@
 
 #include <QTimerEvent>
 #include <QDebug>
+#include <QCoreApplication>
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -23,19 +24,23 @@ const string SANDTRAY_BG("/sandtray/background/image/compressed");
 BagReader::BagReader(QObject *parent) :
     QObject(parent),
     running_(false),
+    begin_(ros::TIME_MIN),
+    end_(ros::TIME_MAX),
     time_scale_(1)
 {
 
 
 }
 
-void BagReader::start() {
+void BagReader::start()
+{
     running_ = true;
-    processBag();
     emit started();
+    processBag();
 }
 
-void BagReader::stop() {
+void BagReader::stop()
+{
     qDebug() << "Closing the bag.";
     running_ = false;
 }
@@ -54,54 +59,61 @@ void BagReader::loadBag(const std::__cxx11::string &path)
     emit bagLoaded(begin_time, end_time);
 }
 
-void BagReader::processBag(ros::Time start, ros::Time stop)
+void BagReader::processBag()
 {
     vector<string> topics = {AUDIO_PURPLE, CAM_ENV, CAM_PURPLE, CAM_YELLOW, SANDTRAY_BG};
 
-    rosbag::View view;
-    view.addQuery(bag_, rosbag::TopicQuery(topics), start, stop);
+    while(running_) {
+        rosbag::View view;
+        view.addQuery(bag_, rosbag::TopicQuery(topics), begin_, end_);
 
-    // configure the time translator
+        // configure the time translator
 
-    time_translator_.setTimeScale(1);
-    time_translator_.setRealStartTime(view.getBeginTime());
-    ros::WallTime now_wt = ros::WallTime::now();
-    time_translator_.setTranslatedStartTime(ros::Time(now_wt.sec, now_wt.nsec));
+        time_translator_.setTimeScale(1);
+        time_translator_.setRealStartTime(view.getBeginTime());
+        ros::WallTime now_wt = ros::WallTime::now();
+        time_translator_.setTranslatedStartTime(ros::Time(now_wt.sec, now_wt.nsec));
 
-    for(rosbag::MessageInstance const m : view)
-    {
-        if(!running_) break;
-
-        ros::Time const& time = m.getTime();
-        emit timeUpdate(time);
-
-        ros::Time translated = time_translator_.translate(time);
-        ros::WallTime horizon = ros::WallTime(translated.sec, translated.nsec);
-        ros::WallTime::sleepUntil(horizon);
-
-        if(m.getTopic() == AUDIO_PURPLE) {
-            auto msg = m.instantiate<audio_common_msgs::AudioData>();
-
-            emit audioFrameReady(msg);
-
-        }
-        else {
-            auto compressed_rgb = m.instantiate<sensor_msgs::CompressedImage>();
-            if (compressed_rgb != NULL) {
-                auto cvimg = cv::imdecode(compressed_rgb->data,1);
-
-                if(m.getTopic() == CAM_ENV) emit envImgReady(cvimg);
-                else if(m.getTopic() == CAM_PURPLE) emit purpleImgReady(cvimg);
-                else if(m.getTopic() == CAM_YELLOW) emit yellowImgReady(cvimg);
-                else if(m.getTopic() == SANDTRAY_BG) emit sandtrayImgReady(cvimg);
+        for(rosbag::MessageInstance const m : view)
+        {
+            if(!running_ || restartProcess_) {
+                restartProcess_ = false;
+                break;
             }
+
+            ros::Time const& time = m.getTime();
+            emit timeUpdate(time);
+
+            ros::Time translated = time_translator_.translate(time);
+            ros::WallTime horizon = ros::WallTime(translated.sec, translated.nsec);
+            ros::WallTime::sleepUntil(horizon);
+
+            if(m.getTopic() == AUDIO_PURPLE) {
+                auto msg = m.instantiate<audio_common_msgs::AudioData>();
+
+                emit audioFrameReady(msg);
+
+            }
+            else {
+                auto compressed_rgb = m.instantiate<sensor_msgs::CompressedImage>();
+                if (compressed_rgb != NULL) {
+                    auto cvimg = cv::imdecode(compressed_rgb->data,1);
+
+                    if(m.getTopic() == CAM_ENV) emit envImgReady(cvimg);
+                    else if(m.getTopic() == CAM_PURPLE) emit purpleImgReady(cvimg);
+                    else if(m.getTopic() == CAM_YELLOW) emit yellowImgReady(cvimg);
+                    else if(m.getTopic() == SANDTRAY_BG) emit sandtrayImgReady(cvimg);
+                }
+            }
+
+            QCoreApplication::processEvents();
         }
     }
-
 }
 
 void BagReader::setPlayTime(ros::Time time)
 {
-    qDebug() << QString("Setting playhead to: %1").arg(time.toSec(),13, 'f', 1) << " sec";
+    begin_ = time;
+    restartProcess_ = true;
 }
 
