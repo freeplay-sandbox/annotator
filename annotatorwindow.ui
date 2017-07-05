@@ -113,13 +113,13 @@
   <customwidget>
    <class>ImageViewer</class>
    <extends>QWidget</extends>
-   <header>imageviewer.h</header>
+   <header>src/imageviewer.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>Timeline</class>
    <extends>QWidget</extends>
-   <header>timeline.hpp</header>
+   <header>src/timeline.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
