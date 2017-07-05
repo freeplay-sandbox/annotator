@@ -1,4 +1,4 @@
-QT       += core gui widgets
+QT       += core gui widgets network
 
 TARGET = freeplay-sandbox-annotator
 TEMPLATE = app
@@ -17,7 +17,8 @@ SOURCES += main.cpp\
     converter.cpp \
     timeline.cpp \
     gstaudioplay.cpp \
-    annotation.cpp
+    annotation.cpp \
+    ajaxresponder.cpp
 
 HEADERS  += annotatorwindow.h \
     bagreader.h \
@@ -25,6 +26,7 @@ HEADERS  += annotatorwindow.h \
     converter.h \
     timeline.hpp \
     gstaudioplay.h \
-    annotation.h
+    annotation.h \
+    ajaxresponder.h
 
 FORMS    += annotatorwindow.ui

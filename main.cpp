@@ -2,6 +2,8 @@
 #include <memory>
 
 #include <QtWidgets>
+#include <QNetworkInterface>
+
 #include <opencv2/opencv.hpp>
 #include <ros/time.h>
 #include <audio_common_msgs/AudioData.h>
@@ -11,7 +13,8 @@
 #include "imageviewer.h"
 #include "converter.h"
 #include "timeline.hpp"
-#include <gstaudioplay.h>
+#include "gstaudioplay.h"
+#include "ajaxresponder.h"
 
 Q_DECLARE_METATYPE(cv::Mat)
 Q_DECLARE_METATYPE(ros::Time)
@@ -32,6 +35,32 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 
     gst_init(&argc, &argv);
+
+    ////////////////////////////////////////////////////////
+    /// \brief ajaxResponder
+    ///
+    AjaxResponder ajaxResponder;
+
+    if (!ajaxResponder.listen(QHostAddress::Any, 8080)) {
+        qDebug() << QString("Webserver: unable to start: %1.").arg(ajaxResponder.errorString());
+    }
+
+    QString ipAddress;
+    QList<QHostAddress> ipAddressesList = QNetworkInterface::allAddresses();
+    // use the first non-localhost IPv4 address
+    for (int i = 0; i < ipAddressesList.size(); ++i) {
+        if (ipAddressesList.at(i) != QHostAddress::LocalHost &&
+                        ipAddressesList.at(i).toIPv4Address()) {
+            ipAddress = ipAddressesList.at(i).toString();
+            break;
+        }
+    }
+    // if we did not find one, use IPv4 localhost
+    if (ipAddress.isEmpty())
+        ipAddress = QHostAddress(QHostAddress::LocalHost).toString();
+    qDebug() << QString("The server is running on %1:%2")
+                .arg(ipAddress).arg(ajaxResponder.serverPort());
+    ////////////////////////////////////////////////////////
 
     GstAudioPlay gstAudioPlayer;
 
@@ -98,8 +127,8 @@ int main(int argc, char *argv[])
 
     QObject::connect(timeline, &Timeline::timeJump, &bagreader, &BagReader::setPlayTime);
 
-    //bagreader.loadBag("/home/slemaignan/freeplay_sandox/data/2017-06-13-102226367218/freeplay.bag");
-    bagreader.loadBag("/home/skadge/freeplay_sandox/data/2017-05-18-145157833880/freeplay.bag");
+    bagreader.loadBag("/home/slemaignan/freeplay_sandox/data/2017-06-13-102226367218/freeplay.bag");
+    //bagreader.loadBag("/home/skadge/freeplay_sandox/data/2017-05-18-145157833880/freeplay.bag");
 
     QMetaObject::invokeMethod(&bagreader, "start");
 
@@ -107,5 +136,4 @@ int main(int argc, char *argv[])
 
 }
 
-//#include "main.moc"
 
