@@ -17,14 +17,14 @@ SOURCES +=\
     src/http_server/request_handler.cpp \
     src/http_server/request_parser.cpp \
     src/main.cpp \
-    src/ajaxresponder.cpp \
     src/annotation.cpp \
     src/annotatorwindow.cpp \
     src/bagreader.cpp \
     src/converter.cpp \
     src/imageviewer.cpp \
     src/gstaudioplay.cpp \
-    src/timeline.cpp
+    src/timeline.cpp \
+    src/ajaxhandler.cpp
 
 HEADERS  += \
     src/http_server/connection.hpp \
@@ -35,13 +35,13 @@ HEADERS  += \
     src/http_server/request_handler.hpp \
     src/http_server/request_parser.hpp \
     src/http_server/server.hpp \
-    src/ajaxresponder.h \
     src/annotation.h \
     src/annotatorwindow.h \
     src/bagreader.h \
     src/converter.h \
     src/imageviewer.h \
     src/gstaudioplay.h \
-    src/timeline.hpp
+    src/timeline.hpp \
+    src/ajaxhandler.h
 
 FORMS    += annotatorwindow.ui
