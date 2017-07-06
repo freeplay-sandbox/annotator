@@ -2,7 +2,7 @@
 // request_handler.hpp
 // ~~~~~~~~~~~~~~~~~~~
 //
-// Copyright (c) 2003-2014 Christopher M. Kohlhoff (chris at kohlhoff dot com)
+// Copyright (c) 2003-2017 Christopher M. Kohlhoff (chris at kohlhoff dot com)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -22,20 +22,19 @@ struct request;
 /// The common handler for all incoming requests.
 class request_handler
 {
-private:
+public:
   request_handler(const request_handler&) = delete;
   request_handler& operator=(const request_handler&) = delete;
 
-public:
-  // Default constructor
-  request_handler() {};
-
-  virtual ~request_handler() {};
+  /// Construct with a directory containing files to be served.
+  explicit request_handler(const std::string& doc_root);
 
   /// Handle a request and produce a reply.
-  virtual void handle_request(const request& req, reply& rep) = 0;
+  virtual void handle_request(const request& req, reply& rep);
 
 protected:
+  /// The directory containing the files to be served.
+  std::string doc_root_;
 
   /// Perform URL-decoding on a string. Returns false if the encoding was
   /// invalid.

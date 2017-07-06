@@ -14,10 +14,10 @@ class AjaxHandler : public QObject, public http::server::request_handler
 
 public:
 
-    AjaxHandler(QObject * parent = nullptr):QObject(parent) {}
+    AjaxHandler(QObject * parent = nullptr):QObject(parent), http::server::request_handler("./html") {}
 
-    void handle_request(const http::server::request& request,
-                        http::server::reply& response);
+    virtual void handle_request(const http::server::request& request,
+                                http::server::reply& response) override;
 
     Q_SIGNAL void annotationReceived(StreamType stream, AnnotationType annotation);
 

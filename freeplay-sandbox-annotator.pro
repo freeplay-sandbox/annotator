@@ -24,7 +24,8 @@ SOURCES +=\
     src/imageviewer.cpp \
     src/gstaudioplay.cpp \
     src/timeline.cpp \
-    src/ajaxhandler.cpp
+    src/ajaxhandler.cpp \
+    src/http_server/mime_types.cpp
 
 HEADERS  += \
     src/http_server/connection.hpp \
@@ -42,6 +43,7 @@ HEADERS  += \
     src/imageviewer.h \
     src/gstaudioplay.h \
     src/timeline.hpp \
-    src/ajaxhandler.h
+    src/ajaxhandler.h \
+    src/http_server/mime_types.hpp
 
 FORMS    += annotatorwindow.ui
