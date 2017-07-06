@@ -43,9 +43,30 @@ void Timeline::setPlayhead(ros::Time time)
 
    purpleAnnotations.updateCurrentAnnotationEnd(time);
    yellowAnnotations.updateCurrentAnnotationEnd(time);
+   generalAnnotations.updateCurrentAnnotationEnd(time);
 
    current_ = time;
    update();
+}
+
+void Timeline::newAnnotation(StreamType stream, AnnotationType annotationtype)
+{
+
+    Annotation a({annotationtype, current_, current_});
+
+    switch (stream) {
+    case StreamType::PURPLE:
+        purpleAnnotations.add(a);
+        break;
+    case StreamType::YELLOW:
+        yellowAnnotations.add(a);
+        break;
+    case StreamType::GLOBAL:
+        generalAnnotations.add(a);
+        break;
+    default:
+        break;
+    }
 }
 
 void Timeline::paintEvent(QPaintEvent *event)

@@ -36,12 +36,11 @@ int main(int argc, char *argv[])
     qRegisterMetaType<ros::Duration>();
     qRegisterMetaType<audio_common_msgs::AudioDataConstPtr>();
 
-    QApplication app(argc, argv);
 
     gst_init(&argc, &argv);
 
     ////////////////////////////////////////////////////////
-    /// \brief ajaxResponder
+    /// \brief HTTP server
     ///
     qDebug() << "Listening for clients...";
     http::server::server<AjaxHandler> s("0.0.0.0", "8080");
@@ -55,8 +54,10 @@ int main(int argc, char *argv[])
 
     ////////////////////////////////////////////////////////
 
-    GstAudioPlay gstAudioPlayer;
 
+    QApplication app(argc, argv);
+
+    GstAudioPlay gstAudioPlayer;
     AnnotatorWindow aw;
 
     Timeline *timeline = aw.findChild<Timeline*>("timeline");
@@ -120,14 +121,16 @@ int main(int argc, char *argv[])
 
     QObject::connect(timeline, &Timeline::timeJump, &bagreader, &BagReader::setPlayTime);
 
+    QObject::connect(&s.request_handler, &AjaxHandler::annotationReceived, timeline, &Timeline::newAnnotation);
+
     bagreader.loadBag("/home/slemaignan/freeplay_sandox/data/2017-06-13-102226367218/freeplay.bag");
     //bagreader.loadBag("/home/skadge/freeplay_sandox/data/2017-05-18-145157833880/freeplay.bag");
 
     QMetaObject::invokeMethod(&bagreader, "start");
 
-    auto timer = new QTimer();
-    connect(timer, &QTimer::timeout, app, [&]{s.poll();});
-    timer->start();
+    QTimer timer;
+    QObject::connect(&timer, &QTimer::timeout, [&]{s.poll();});
+    timer.start();
 
     return app.exec();
 

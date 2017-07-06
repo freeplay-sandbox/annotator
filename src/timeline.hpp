@@ -22,6 +22,8 @@ class Timeline : public QWidget {
     Q_SLOT void initialize(ros::Time begin, ros::Time end);
     Q_SLOT void setPlayhead(ros::Time time);
 
+    Q_SLOT void newAnnotation(StreamType stream, AnnotationType annotation);
+
    protected:
     virtual void paintEvent(QPaintEvent *event) override;
     virtual void keyPressEvent(QKeyEvent* event) override;

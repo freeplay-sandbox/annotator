@@ -10,7 +10,15 @@
 #include <QBrush>
 #include <ros/time.h>
 
-enum class AnnotationType {HOSTILE, PROSOCIAL, ASSERTIVE, PASSIVE, ADULTSEEKING, IRRELEVANT};
+enum class StreamType {PURPLE, YELLOW, GLOBAL};
+
+enum class AnnotationType {OTHER=0,
+                           HOSTILE,
+                           PROSOCIAL,
+                           ASSERTIVE,
+                           PASSIVE,
+                           ADULTSEEKING,
+                           IRRELEVANT};
 
 struct Annotation
 {
