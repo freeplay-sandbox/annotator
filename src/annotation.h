@@ -48,10 +48,11 @@ public:
     const_iterator end() const {return annotations.end();}
     const_iterator cend() const {return annotations.cend();}
 
-    void add(Annotation annotation) {annotations.push_back(std::make_shared<Annotation>(annotation));}
+    void add(Annotation annotation);
 private:
 
-    std::tuple<AnnotationPtr,AnnotationPtr> getAnnotationAtAndNext(ros::Time time);
+    AnnotationPtr getAnnotationAt(ros::Time time);
+    AnnotationPtr getAnnotationAtApprox(ros::Time time);
 
     std::vector<AnnotationPtr> annotations;
 
