@@ -11,7 +11,7 @@
 
 #include <rosbag/view.h>
 
-#include "bagreader.h"
+#include "bagreader.hpp"
 
 using namespace std;
 

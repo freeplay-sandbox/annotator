@@ -2,7 +2,6 @@
 #include <memory>
 
 #include <QtWidgets>
-#include <QNetworkInterface>
 #include <QTimer>
 
 #include <opencv2/opencv.hpp>
@@ -10,14 +9,14 @@
 #include <audio_common_msgs/AudioData.h>
 #include <boost/asio.hpp>
 
-#include "annotatorwindow.h"
-#include "bagreader.h"
-#include "imageviewer.h"
-#include "converter.h"
+#include "annotatorwindow.hpp"
+#include "bagreader.hpp"
+#include "imageviewer.hpp"
+#include "converter.hpp"
 #include "timeline.hpp"
-#include "gstaudioplay.h"
+#include "gstaudioplay.hpp"
 
-#include "ajaxhandler.h"
+#include "ajaxhandler.hpp"
 #include "http_server/server.hpp"
 
 Q_DECLARE_METATYPE(cv::Mat)

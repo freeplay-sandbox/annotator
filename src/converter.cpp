@@ -4,7 +4,7 @@
 
 #include <QDebug>
 
-#include "converter.h"
+#include "converter.hpp"
 
 void Converter::matDeleter(void *mat) { delete static_cast<cv::Mat*>(mat); }
 

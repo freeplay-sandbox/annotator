@@ -1,7 +1,7 @@
 #include <QPainter>
 #include <QDebug>
 
-#include "imageviewer.h"
+#include "imageviewer.hpp"
 
 void ImageViewer::paintEvent(QPaintEvent *) {
     QPainter p(this);

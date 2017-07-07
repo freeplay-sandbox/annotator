@@ -12,7 +12,7 @@
 #include "http_server/reply.hpp"
 #include "http_server/request.hpp"
 
-#include "ajaxhandler.h"
+#include "ajaxhandler.hpp"
 
 
 using namespace std;

@@ -5,7 +5,7 @@
 #include <json/json.h>
 #include <QObject>
 
-#include "annotation.h"
+#include "annotation.hpp"
 #include "http_server/request_handler.hpp"
 
 class AjaxHandler : public QObject, public http::server::request_handler

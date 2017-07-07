@@ -9,7 +9,7 @@
 
 #include <ros/time.h>
 
-#include "annotation.h"
+#include "annotation.hpp"
 
 class Timeline : public QWidget {
     Q_OBJECT

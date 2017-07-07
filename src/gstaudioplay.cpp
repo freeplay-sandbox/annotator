@@ -1,7 +1,7 @@
 
 #include <QDebug>
 
-#include "gstaudioplay.h"
+#include "gstaudioplay.hpp"
 
 
 

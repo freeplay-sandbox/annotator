@@ -1,7 +1,7 @@
 #include <QDebug>
 #include <QKeyEvent>
 
-#include "annotatorwindow.h"
+#include "annotatorwindow.hpp"
 #include "ui_annotatorwindow.h"
 
 

@@ -113,7 +113,7 @@
   <customwidget>
    <class>ImageViewer</class>
    <extends>QWidget</extends>
-   <header>src/imageviewer.h</header>
+   <header>src/imageviewer.hpp</header>
    <container>1</container>
   </customwidget>
   <customwidget>

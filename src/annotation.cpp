@@ -1,7 +1,7 @@
 
 #include <QDebug>
 
-#include "annotation.h"
+#include "annotation.hpp"
 
 using namespace std;
 
