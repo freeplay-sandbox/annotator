@@ -248,6 +248,22 @@ void Timeline::mousePressEvent(QMouseEvent *event)
     }
 }
 
+
+void Timeline::wheelEvent(QWheelEvent *event) {
+        //setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+        double scaleFactor = 1.25;
+        if (event->delta() > 0) {
+            // zoom in
+            timescale_ *= scaleFactor;
+            if (timescale_ > 50.) timescale_ = 50.;
+        } else {
+            // zoom out
+            timescale_ /= scaleFactor;
+            if (timescale_ < 1.) timescale_ = 1.;
+        }
+        event->accept();
+}
+
 ros::Time Timeline::pointToTimestamp(QPoint point) {
 
     return begin_ + (end_ - begin_) * (point.x()/timescale_ * 1.0/size().width());
