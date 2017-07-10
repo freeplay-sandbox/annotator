@@ -10,6 +10,7 @@
 #include <ros/time.h>
 
 #include "annotation.hpp"
+#include "freeannotationwidget.hpp"
 
 class Timeline : public QWidget {
     Q_OBJECT
@@ -56,6 +57,8 @@ class Timeline : public QWidget {
     Annotations generalAnnotations;
     Annotations purpleAnnotations;
     Annotations yellowAnnotations;
+
+    std::vector<std::shared_ptr<FreeAnnotationWidget>> freeAnnotations;
 };
 
 #endif

@@ -36,6 +36,14 @@ void Timeline::initialize(ros::Time begin, ros::Time end)
 
     purpleAnnotations.add({AnnotationType::PASSIVE, current_, current_});
     yellowAnnotations.add({AnnotationType::PASSIVE, current_, current_});
+
+    freeAnnotations.push_back(make_shared<FreeAnnotationWidget>(begin_ + ros::Duration(10), FreeAnnotationType::INTERESTING, "hello world"));
+    freeAnnotations.push_back(make_shared<FreeAnnotationWidget>(begin_ + ros::Duration(20), FreeAnnotationType::ISSUE, "hello world issue"));
+
+    for(auto freeannotation : freeAnnotations) {
+        freeannotation->setParent(this);
+        freeannotation->show();
+    }
 }
 
 void Timeline::setPlayhead(ros::Time time)
@@ -71,6 +79,7 @@ void Timeline::newAnnotation(StreamType stream, AnnotationType annotationtype)
 
 void Timeline::paintEvent(QPaintEvent *event)
 {
+
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
@@ -175,6 +184,21 @@ void Timeline::drawTimeline(QPainter *painter, const QRectF &rect) {
         painter->drawEllipse(left - radius/2 + start * pxPerSec, yellowAnnotationHeight - radius/2, radius,radius);
         painter->drawLine(QLine(left + start * pxPerSec, yellowAnnotationHeight, left + stop * pxPerSec, yellowAnnotationHeight));
     }
+
+
+    // placement of free annotations
+    for(auto freeannotation : freeAnnotations) {
+        auto atime = (freeannotation->time - begin_).toSec();
+
+        if ( atime > startTime && atime < startTime + visibleDuration) {
+            freeannotation->move(atime * pxPerSec, generalAnnotationHeight);
+            if(!freeannotation->isVisible()) freeannotation->show();
+        }
+        else {
+            if(freeannotation->isVisible()) freeannotation->hide();
+        }
+    }
+
 }
 
 void Timeline::keyPressEvent(QKeyEvent *event) {
