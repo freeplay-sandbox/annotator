@@ -148,11 +148,20 @@ void BagReader::processBag()
             }
 
             ros::Time const& time = m.getTime();
+
+            if (time >= bag_end_) {
+                current_ = bag_begin_;
+                pause();
+                emit timeUpdate(current_);
+                emit durationUpdate(current_ - bag_begin_);
+                break;
+            }
+
             current_ = time;
             emit timeUpdate(time);
             emit durationUpdate(time - bag_begin_);
 
-            ros::Time translated = time_translator_.translate(time);
+            ros::Time translated = time_translator_.translate(current_);
             ros::WallTime horizon = ros::WallTime(translated.sec, translated.nsec);
             ros::WallTime::sleepUntil(horizon);
 
