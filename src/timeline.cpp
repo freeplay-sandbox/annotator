@@ -83,63 +83,99 @@ void Timeline::paintEvent(QPaintEvent *event)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
+    auto& rect = event->rect();
 
-    drawTimeline(&painter, event->rect());
+    auto left = rect.left();
+    auto right = rect.right();
+    auto top = rect.top();
+    auto bottom = rect.bottom() - 20;
+
+    generalAnnotationOffset_ = top + 10;
+    purpleAnnotationOffset_ = top + 30;
+    yellowAnnotationOffset_ = top + 50;
+
+    auto bagLength = (end_ - begin_).toSec();
+
+    pxPerSec_ = (right - left) * 1.0/ bagLength * timescale_;
+    visibleDuration_ = (right - left) / pxPerSec_;
+    elapsedTime_ = (current_ - begin_).toSec();
+    startTime_ = std::min(std::max(0., elapsedTime_ - visibleDuration_  * 2./3), (end_.toSec() - visibleDuration_));
+
+
+    drawTimeline(&painter, left, right, top, bottom);
+
+    //placeFreeAnnotations();
 
 }
 
-void Timeline::drawTimeline(QPainter *painter, const QRectF &rect) {
+void Timeline::placeFreeAnnotations() {
 
-    const int margin = 20;
-    auto left = static_cast<int>(std::floor(rect.left()));
-    auto right = static_cast<int>(std::ceil(rect.right()));
-    auto top = static_cast<int>(std::floor(rect.top()));
-    auto bottom = static_cast<int>(std::ceil(rect.bottom())) - 20;
+    // placement of free annotations
+    for(auto freeannotation : freeAnnotations) {
+        auto atime = (freeannotation->time - begin_).toSec();
 
-    auto bagLength = (end_ - begin_).toSec();
-    auto elapsedTime = (current_ - begin_).toSec();
-
-    double pxPerSec = (right - left) * 1.0/ bagLength * timescale_;
-
-    double visibleDuration = (right - left) / pxPerSec;
-
-    auto startTime = std::max(0., elapsedTime - visibleDuration  * 2./3);
-
-    double exactNbSecs = startTime;
-    int major_increment = 60; int minor_increment = 30;
-    if (pxPerSec > 2) {major_increment = 30; minor_increment = 10;}
-    if (pxPerSec > 3) {major_increment = 20; minor_increment = 5;}
-    if (pxPerSec > 7) {major_increment = 10; minor_increment = 2;}
-    if (pxPerSec > 30) {major_increment = 5; minor_increment = 1;}
-
-    // compute lines to draw
-    std::vector<QLine> lines_light;
-    std::vector<QLine> lines_dark;
-    for (double x = left; x <= right; x += pxPerSec * minor_increment) {
-
-        int nbSecs = static_cast<int>(std::round(exactNbSecs));
-
-        if(nbSecs % major_increment == 0) {
-            lines_light.push_back(QLine(x, top, x, bottom + 10));
-            painter->drawText(QPoint(x + 5, bottom + 20), QString("%1:%2").arg(nbSecs / 60,2,10,QChar('0')).arg(nbSecs % 60,2,10,QChar('0')));
+        if ( atime > startTime_ && atime < startTime_ + visibleDuration_) {
+            freeannotation->move(atime * pxPerSec_, generalAnnotationOffset_);
+            if(!freeannotation->isVisible()) freeannotation->show();
         }
         else {
-           lines_dark.push_back(QLine(x, top, x, bottom));
+            if(freeannotation->isVisible()) freeannotation->hide();
         }
-
-        exactNbSecs += minor_increment;
     }
 
-    int generalAnnotationHeight = top + 10;
-    int purpleAnnotationHeight = top + 30;
-    int yellowAnnotationHeight = top + 50;
+
+}
+
+void Timeline::drawTimeline(QPainter *painter, int left, int right, int top, int bottom) {
+
+
+    int major_increment = 60; int minor_increment = 30;
+    if (pxPerSec_ > 2) {major_increment = 30; minor_increment = 10;}
+    if (pxPerSec_ > 3) {major_increment = 20; minor_increment = 5;}
+    if (pxPerSec_ > 7) {major_increment = 10; minor_increment = 2;}
+    if (pxPerSec_ > 30) {major_increment = 5; minor_increment = 1;}
+
+    // compute lines to draw
+
+    double nbSecs = startTime_;
+
+    std::vector<QLine> lines_light;
+    std::vector<QLine> lines_dark;
+
+    for (int t = static_cast<int>(std::round(startTime_)) % minor_increment; t <= visibleDuration_; t += minor_increment) {
+
+        // if(nbSecs % major_increment == 0) {
+        //    lines_light.push_back(QLine(x, top, x, bottom + 10));
+       //     painter->drawText(QPoint(x + 5, bottom + 20), QString("%1:%2").arg(nbSecs / 60,2,10,QChar('0')).arg(nbSecs % 60,2,10,QChar('0')));
+        //}
+        //else {
+           lines_dark.push_back(QLine(t * pxPerSec_, top, t * pxPerSec_, bottom));
+        //}
+
+    }
+//
+//    for (double x = left; x <= right; x += pxPerSec_ * minor_increment) {
+//
+//        auto atime = x / pxPerSec_;
+//
+//        if(nbSecs % major_increment == 0) {
+//            lines_light.push_back(QLine(x, top, x, bottom + 10));
+//            painter->drawText(QPoint(x + 5, bottom + 20), QString("%1:%2").arg(nbSecs / 60,2,10,QChar('0')).arg(nbSecs % 60,2,10,QChar('0')));
+//        }
+//        else {
+//           lines_dark.push_back(QLine(x, top, x, bottom));
+//        }
+//
+//        exactNbSecs += minor_increment;
+//    }
+
 
     painter->fillRect(QRectF(left,top,right,bottom), _color_background);
 
     // annotation zones
-    painter->fillRect(QRectF(left,generalAnnotationHeight - 5,right,10), _color_background.darker());
-    painter->fillRect(QRectF(left,purpleAnnotationHeight - 5,right,10), QColor("#4c2d64"));
-    painter->fillRect(QRectF(left,yellowAnnotationHeight - 5,right,10), QColor("#64592d"));
+    painter->fillRect(QRectF(left,generalAnnotationOffset_ - 5,right,10), _color_background.darker());
+    painter->fillRect(QRectF(left,purpleAnnotationOffset_ - 5,right,10), QColor("#4c2d64"));
+    painter->fillRect(QRectF(left,yellowAnnotationOffset_ - 5,right,10), QColor("#64592d"));
 
     // draw calls
     painter->setPen(_pen_light);
@@ -150,53 +186,40 @@ void Timeline::drawTimeline(QPainter *painter, const QRectF &rect) {
 
     // playhead
     painter->setPen(_pen_playhead);
-    painter->drawLine(QLine(left + (elapsedTime - startTime) * pxPerSec, top, left + (elapsedTime - startTime) * pxPerSec, bottom));
+    painter->drawLine(QLine(left + (elapsedTime_ - startTime_) * pxPerSec_, top, left + (elapsedTime_ - startTime_) * pxPerSec_, bottom));
 
 
     // Drawing of annotations
     int radius = 4;
 
     for(auto a : generalAnnotations) {
-        auto start = std::max(0., (a->start - begin_).toSec() - startTime);
-        auto stop = std::min((a->stop - begin_).toSec() - startTime, startTime + visibleDuration);
+        auto start = std::max(0., (a->start - begin_).toSec() - startTime_);
+        auto stop = std::min((a->stop - begin_).toSec() - startTime_, startTime_ + visibleDuration_);
 
         painter->setPen(Annotation::Styles[a->type]);
         painter->setBrush(Annotation::Styles[a->type].brush());
-        painter->drawEllipse(left - radius/2 + start * pxPerSec, generalAnnotationHeight - radius/2, radius,radius);
-        painter->drawLine(QLine(left + start * pxPerSec, generalAnnotationHeight, left + stop * pxPerSec, generalAnnotationHeight));
+        painter->drawEllipse(left - radius/2 + start * pxPerSec_, generalAnnotationOffset_ - radius/2, radius,radius);
+        painter->drawLine(QLine(left + start * pxPerSec_, generalAnnotationOffset_, left + stop * pxPerSec_, generalAnnotationOffset_));
     }
-   for(auto a : purpleAnnotations) {
-        auto start = std::max(0., (a->start - begin_).toSec() - startTime);
-        auto stop = std::min((a->stop - begin_).toSec() - startTime, startTime + visibleDuration);
+
+    for(auto a : purpleAnnotations) {
+        auto start = std::max(0., (a->start - begin_).toSec() - startTime_);
+        auto stop = std::min((a->stop - begin_).toSec() - startTime_, startTime_ + visibleDuration_);
 
         painter->setPen(Annotation::Styles[a->type]);
         painter->setBrush(Annotation::Styles[a->type].brush());
-        painter->drawEllipse(left - radius/2 + start * pxPerSec, purpleAnnotationHeight - radius/2, radius,radius);
-        painter->drawLine(QLine(left + start * pxPerSec, purpleAnnotationHeight, left + stop * pxPerSec, purpleAnnotationHeight));
+        painter->drawEllipse(left - radius/2 + start * pxPerSec_, purpleAnnotationOffset_ - radius/2, radius,radius);
+        painter->drawLine(QLine(left + start * pxPerSec_, purpleAnnotationOffset_, left + stop * pxPerSec_, purpleAnnotationOffset_));
     }
 
     for(auto a : yellowAnnotations) {
-        auto start = std::max(0., (a->start - begin_).toSec() - startTime);
-        auto stop = std::min((a->stop - begin_).toSec() - startTime, startTime + visibleDuration);
+        auto start = std::max(0., (a->start - begin_).toSec() - startTime_);
+        auto stop = std::min((a->stop - begin_).toSec() - startTime_, startTime_ + visibleDuration_);
 
         painter->setPen(Annotation::Styles[a->type]);
         painter->setBrush(Annotation::Styles[a->type].brush());
-        painter->drawEllipse(left - radius/2 + start * pxPerSec, yellowAnnotationHeight - radius/2, radius,radius);
-        painter->drawLine(QLine(left + start * pxPerSec, yellowAnnotationHeight, left + stop * pxPerSec, yellowAnnotationHeight));
-    }
-
-
-    // placement of free annotations
-    for(auto freeannotation : freeAnnotations) {
-        auto atime = (freeannotation->time - begin_).toSec();
-
-        if ( atime > startTime && atime < startTime + visibleDuration) {
-            freeannotation->move(atime * pxPerSec, generalAnnotationHeight);
-            if(!freeannotation->isVisible()) freeannotation->show();
-        }
-        else {
-            if(freeannotation->isVisible()) freeannotation->hide();
-        }
+        painter->drawEllipse(left - radius/2 + start * pxPerSec_, yellowAnnotationOffset_ - radius/2, radius,radius);
+        painter->drawLine(QLine(left + start * pxPerSec_, yellowAnnotationOffset_, left + stop * pxPerSec_, yellowAnnotationOffset_));
     }
 
 }

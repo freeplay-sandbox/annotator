@@ -51,7 +51,10 @@ class Timeline : public QWidget {
 
     QBrush _brush_background;
 
-    void drawTimeline(QPainter *painter, const QRectF &rect);
+    int generalAnnotationOffset_, purpleAnnotationOffset_, yellowAnnotationOffset_;
+
+    double elapsedTime_, visibleDuration_, startTime_, pxPerSec_;
+
     ros::Time pointToTimestamp(QPoint point);
 
     Annotations generalAnnotations;
@@ -59,6 +62,8 @@ class Timeline : public QWidget {
     Annotations yellowAnnotations;
 
     std::vector<std::shared_ptr<FreeAnnotationWidget>> freeAnnotations;
+    void placeFreeAnnotations();
+    void drawTimeline(QPainter *painter, int left, int right, int top, int bottom);
 };
 
 #endif
