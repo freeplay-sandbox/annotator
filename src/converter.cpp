@@ -15,7 +15,7 @@ void Converter::queue(const cv::Mat &frame) {
 }
 
 void Converter::process(cv::Mat frame) {
-    cv::resize(frame, frame, cv::Size(), 0.3, 0.3, cv::INTER_AREA);
+    //cv::resize(frame, frame, cv::Size(), 0.3, 0.3, cv::INTER_AREA);
     cv::cvtColor(frame, frame, CV_BGR2RGB);
     const QImage image(frame.data, frame.cols, frame.rows, frame.step,
                        QImage::Format_RGB888, &matDeleter, new cv::Mat(frame));
