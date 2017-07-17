@@ -296,5 +296,5 @@ void Timeline::wheelEvent(QWheelEvent *event) {
 
 ros::Time Timeline::pointToTimestamp(QPoint point) {
 
-    return begin_ + (end_ - begin_) * (point.x()/timescale_ * 1.0/size().width());
+    return begin_ + ros::Duration(startTime_ + (point.x())/pxPerSec_);
 }
