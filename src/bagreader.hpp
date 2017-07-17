@@ -20,9 +20,24 @@ class BagReader : public QObject
     QScopedPointer<cv::VideoCapture> m_videoCapture;
 public:
     BagReader(QObject * parent = {});
+
     Q_SIGNAL void started();
     Q_SLOT void start();
     Q_SLOT void stop();
+    Q_SLOT void pause();
+    Q_SIGNAL void paused();
+    Q_SLOT void resume();
+    Q_SIGNAL void resumed();
+    Q_SLOT void togglePause();
+    Q_SLOT void jumpBy(int secs);
+    /**
+     * jump to a specific timestamp.
+     * A negative value means 'to the end'.
+     *
+     * The timestamp can be either a value relative to the
+     * start time or the absolute timestamp.
+     */
+    Q_SLOT void jumpTo(int secs);
 
     Q_SIGNAL void envImgReady(const cv::Mat &);
     Q_SIGNAL void purpleImgReady(const cv::Mat &);
@@ -43,9 +58,11 @@ public:
 private:
 
     bool running_;
+    bool paused_;
     bool restartProcess_;
     ros::Time bag_begin_, bag_end_;
     ros::Time begin_, end_; // might be different from bag_* if we are playing a subset of the bag
+    ros::Time current_;
 
     float time_scale_;
 

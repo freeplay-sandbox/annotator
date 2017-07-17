@@ -3,6 +3,7 @@
 
 #include <QtWidgets>
 #include <QTimer>
+#include <QPushButton>
 
 #include <opencv2/opencv.hpp>
 #include <ros/time.h>
@@ -77,15 +78,18 @@ int main(int argc, char *argv[])
     yellowConverter.setProcessAll(false);
     sandtrayConverter.setProcessAll(false);
 
+    bagReadingThread.setObjectName("bag reading thread");
     bagReadingThread.start();
-
-
     bagreader.moveToThread(&bagReadingThread);
 
     envConverterThread.start();
+    envConverterThread.setObjectName("env camera converter thread");
     purpleConverterThread.start();
+    purpleConverterThread.setObjectName("purple camera converter thread");
     yellowConverterThread.start();
+    yellowConverterThread.setObjectName("yellow camera converter thread");
     sandtrayConverterThread.start();
+    sandtrayConverterThread.setObjectName("sandtray bg converter thread");
 
     envConverter.moveToThread(&envConverterThread);
     purpleConverter.moveToThread(&purpleConverterThread);
@@ -106,8 +110,6 @@ int main(int argc, char *argv[])
 
     QObject::connect(&bagreader, &BagReader::audioFrameReady, &gstAudioPlayer, &GstAudioPlay::audioMsgReady);
 
-    //aw.showFullScreen();
-    aw.show();
 
     QObject::connect(&bagreader, &BagReader::started, [](){ qDebug() << "Starting to play the bag file"; });
 
@@ -122,11 +124,41 @@ int main(int argc, char *argv[])
 
     QObject::connect(&s.request_handler, &AjaxHandler::annotationReceived, timeline, &Timeline::newAnnotation);
 
-    bagreader.loadBag("/home/slemaignan/freeplay_sandox/data/2017-06-13-102226367218/freeplay.bag");
+
+    // buttons
+    auto pauseBtn = aw.findChild<QPushButton*>("pauseBtn");
+    QObject::connect(pauseBtn, &QPushButton::clicked, &bagreader, &BagReader::togglePause);
+    QObject::connect(&bagreader, &BagReader::paused, [&](){pauseBtn->setIcon(QIcon::fromTheme("media-playback-start-symbolic"));});
+    QObject::connect(&bagreader, &BagReader::resumed, [&](){pauseBtn->setIcon(QIcon::fromTheme("media-playback-pause-symbolic"));});
+
+    QObject::connect(timeline, &Timeline::togglePause, &bagreader, &BagReader::togglePause);
+
+    auto jumpBack10Btn = aw.findChild<QPushButton*>("jumpBack10Btn");
+    QObject::connect(jumpBack10Btn, &QPushButton::clicked, [&](){bagreader.jumpBy(-10);});
+    auto jumpBack1Btn = aw.findChild<QPushButton*>("jumpBack1Btn");
+    QObject::connect(jumpBack1Btn, &QPushButton::clicked, [&](){bagreader.jumpBy(-1);});
+    auto jumpFwd1Btn = aw.findChild<QPushButton*>("jumpFwd1Btn");
+    QObject::connect(jumpFwd1Btn, &QPushButton::clicked, [&](){bagreader.jumpBy(1);});
+    auto jumpFwd10Btn = aw.findChild<QPushButton*>("jumpFwd10Btn");
+    QObject::connect(jumpFwd10Btn, &QPushButton::clicked, [&](){bagreader.jumpBy(10);});
+
+    auto jumpStartBtn = aw.findChild<QPushButton*>("jumpStartBtn");
+    QObject::connect(jumpStartBtn, &QPushButton::clicked, [&](){bagreader.jumpTo(0);});
+    auto jumpEndBtn = aw.findChild<QPushButton*>("jumpEndBtn");
+    QObject::connect(jumpEndBtn, &QPushButton::clicked, [&](){bagreader.jumpTo(-1);});
+
+
+    // Load bag file and start!
+
+    //aw.showFullScreen();
+    aw.show();
+
+    bagreader.loadBag("/home/slemaignan/freeplay_sandox/data/2017-06-12-143746652201/freeplay.bag");
     //bagreader.loadBag("/home/skadge/freeplay_sandox/data/2017-05-18-145157833880/freeplay.bag");
 
     QMetaObject::invokeMethod(&bagreader, "start");
 
+    // Configure HTTP server polling
     QTimer timer;
     QObject::connect(&timer, &QTimer::timeout, [&]{s.poll();});
     timer.start();

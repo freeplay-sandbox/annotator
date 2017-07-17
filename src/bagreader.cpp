@@ -1,5 +1,7 @@
 #include <vector>
 #include <string>
+#include <chrono>
+#include <thread> // for sleep_for when paused
 
 #include <QTimerEvent>
 #include <QDebug>
@@ -14,6 +16,7 @@
 #include "bagreader.hpp"
 
 using namespace std;
+using namespace std::chrono;
 
 const string AUDIO_PURPLE("camera_purple/audio");
 const string CAM_PURPLE("camera_purple/rgb/image_raw/compressed");
@@ -24,6 +27,7 @@ const string SANDTRAY_BG("/sandtray/background/image/compressed");
 BagReader::BagReader(QObject *parent) :
     QObject(parent),
     running_(false),
+    paused_(false),
     begin_(ros::TIME_MIN),
     end_(ros::TIME_MAX),
     time_scale_(1)
@@ -42,7 +46,58 @@ void BagReader::start()
 void BagReader::stop()
 {
     qDebug() << "Closing the bag.";
+    paused_ = false;
     running_ = false;
+}
+
+void BagReader::togglePause()
+{
+    if (paused_) resume();
+    else pause();
+}
+
+void BagReader::pause()
+{
+    qDebug() << "Paused";
+    paused_ = true;
+    emit paused();
+}
+
+void BagReader::resume()
+{
+    qDebug() << "Resumed";
+    paused_ = false;
+    emit resumed();
+}
+
+void BagReader::jumpBy(int secs)
+{
+    begin_ = current_ = std::min(bag_end_, std::max(bag_begin_, current_ + ros::Duration(secs)));
+    emit timeUpdate(current_);
+    emit durationUpdate(current_ - bag_begin_);
+    restartProcess_ = true;
+
+}
+
+void BagReader::jumpTo(int secs)
+{
+    if(secs < 0) begin_ = end_;
+    else if (secs < 10000) { // we assume the timestamp is relative to the start time
+        begin_ = bag_begin_ + ros::Duration(secs);
+    }
+    else {
+        begin_ = ros::Time(secs);
+    }
+
+    // clamp to the bag length
+    begin_ = std::min(bag_end_, std::max(bag_begin_, begin_));
+
+    current_ = begin_;
+
+    emit timeUpdate(current_);
+    emit durationUpdate(current_ - bag_begin_);
+
+    restartProcess_ = true;
 }
 
 void BagReader::loadBag(const std::__cxx11::string &path)
@@ -53,7 +108,7 @@ void BagReader::loadBag(const std::__cxx11::string &path)
 
     rosbag::View bagview(bag_);
 
-    bag_begin_ = begin_ = bagview.getBeginTime();
+    bag_begin_ = begin_ = current_ = bagview.getBeginTime();
     bag_end_ = end_ = bagview.getEndTime();
 
     emit bagLoaded(bag_begin_, bag_end_);
@@ -76,12 +131,24 @@ void BagReader::processBag()
 
         for(rosbag::MessageInstance const m : view)
         {
+
+            if(paused_) {
+                auto paused_time_ = ros::WallTime::now();
+                while(paused_ && running_) {
+                    QCoreApplication::processEvents();
+                    std::this_thread::sleep_for(milliseconds(10));
+                }
+                ros::WallDuration shift = ros::WallTime::now() - paused_time_;
+                time_translator_.shift(ros::Duration(shift.sec, shift.nsec));
+            }
+
             if(!running_ || restartProcess_) {
                 restartProcess_ = false;
                 break;
             }
 
             ros::Time const& time = m.getTime();
+            current_ = time;
             emit timeUpdate(time);
             emit durationUpdate(time - bag_begin_);
 
@@ -114,7 +181,9 @@ void BagReader::processBag()
 
 void BagReader::setPlayTime(ros::Time time)
 {
-    begin_ = time;
+    begin_ = current_ = time;
+    emit timeUpdate(time);
+    emit durationUpdate(time - bag_begin_);
     restartProcess_ = true;
 }
 

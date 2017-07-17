@@ -20,7 +20,7 @@ AnnotatorWindow::~AnnotatorWindow()
 void AnnotatorWindow::showBagInfo(ros::Duration time)
 {
     int nbSec = time.toSec();
-    ui->statusBar->showMessage(QString("%1:%2").arg(nbSec / 60,2,10,QChar('0')).arg(nbSec % 60,2,10,QChar('0')));
+    ui->statusBar->showMessage(QString("%1:%2 (%3s)").arg(nbSec / 60,2,10,QChar('0')).arg(nbSec % 60,2,10,QChar('0')).arg(time.toSec()));
 }
 
 void AnnotatorWindow::keyPressEvent(QKeyEvent *event) {

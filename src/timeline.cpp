@@ -211,11 +211,8 @@ void Timeline::drawTimeline(QPainter *painter, int left, int right, int top, int
 void Timeline::keyPressEvent(QKeyEvent *event) {
 
     switch (event->key()) {
-    ////// MISC DEBUG
-    case Qt::Key_Enter:
-    case Qt::Key_Return:
-        cout << "Hello" << endl;
-        QWidget::keyPressEvent(event);
+    case Qt::Key_Space:
+        emit togglePause();
         break;
 
     case Qt::Key_Up:
@@ -293,6 +290,8 @@ void Timeline::wheelEvent(QWheelEvent *event) {
             if (timescale_ < 1.) timescale_ = 1.;
         }
         event->accept();
+
+        update();
 }
 
 ros::Time Timeline::pointToTimestamp(QPoint point) {

@@ -46,7 +46,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src # for json/json.h
     )
 
-add_executable(${PROJECT_NAME} ${SRC} ${HEADERS_MOC} ${HEADERS} ${HEADERS_UI})
+add_executable(${PROJECT_NAME} ${SRC} src/annotatorwindow.ui ${HEADERS_MOC} ${HEADERS} ${HEADERS_UI})
 
 target_link_libraries(${PROJECT_NAME}
                       Qt5::Widgets
