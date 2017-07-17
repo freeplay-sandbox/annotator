@@ -44,11 +44,6 @@ class Timeline : public QWidget {
     QColor _color_null;
     QColor _color_bg_text;
 
-    QPen _pen_playhead;
-    QPen _pen_light;
-    QPen _pen_dark;
-    QPen _pen_null;
-
     QBrush _brush_background;
 
     int generalAnnotationOffset_, purpleAnnotationOffset_, yellowAnnotationOffset_;

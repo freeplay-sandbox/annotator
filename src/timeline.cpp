@@ -20,12 +20,8 @@ Timeline::Timeline(QWidget *parent):
           _color_playhead(QColor("#FF2F00")),
           _color_light(QColor("#7F7F7FAA")),
           _color_bg_text(QColor("#a1a1a1")),
-          _pen_playhead(QPen(QBrush(_color_playhead), 2)),
-          _pen_light(QPen(_color_light)),
           _brush_background(_color_background)
 {
-    // initialize default pen settings
-    _pen_light.setWidth(0);
 }
 
 void Timeline::initialize(ros::Time begin, ros::Time end)
@@ -99,8 +95,7 @@ void Timeline::paintEvent(QPaintEvent *event)
     pxPerSec_ = (right - left) * 1.0/ bagLength * timescale_;
     visibleDuration_ = (right - left) / pxPerSec_;
     elapsedTime_ = (current_ - begin_).toSec();
-    startTime_ = std::min(std::max(0., elapsedTime_ - visibleDuration_  * 2./3), (end_.toSec() - visibleDuration_));
-
+    startTime_ = std::min(std::max(0., elapsedTime_ - visibleDuration_  * 2./3), ((end_-begin_).toSec() - visibleDuration_));
 
     drawTimeline(&painter, left, right, top, bottom);
 
@@ -137,37 +132,26 @@ void Timeline::drawTimeline(QPainter *painter, int left, int right, int top, int
 
     // compute lines to draw
 
-    double nbSecs = startTime_;
-
     std::vector<QLine> lines_light;
     std::vector<QLine> lines_dark;
 
-    for (int t = static_cast<int>(std::round(startTime_)) % minor_increment; t <= visibleDuration_; t += minor_increment) {
+    painter->setPen(QPen(_color_light));
 
-        // if(nbSecs % major_increment == 0) {
-        //    lines_light.push_back(QLine(x, top, x, bottom + 10));
-       //     painter->drawText(QPoint(x + 5, bottom + 20), QString("%1:%2").arg(nbSecs / 60,2,10,QChar('0')).arg(nbSecs % 60,2,10,QChar('0')));
-        //}
-        //else {
-           lines_dark.push_back(QLine(t * pxPerSec_, top, t * pxPerSec_, bottom));
-        //}
+    double offset = major_increment - fmod(startTime_, major_increment);
+
+    for (double t = startTime_ + offset; t <= visibleDuration_ + startTime_; t += major_increment) {
+
+        auto x = (t - startTime_) * pxPerSec_;
+
+            lines_light.push_back(QLine(x, top, x, bottom + 20));
+            painter->drawText(QPoint(x + 2, bottom + 20), QString("%1:%2").arg(static_cast<int>(round(t)) / 60,2,10,QChar('0')).arg(static_cast<int>(round(t)) % 60,2,10,QChar('0')));
+
+            for (auto tm = t + minor_increment; tm < t + major_increment; tm += minor_increment) {
+                auto x = (tm - startTime_) * pxPerSec_;
+                lines_dark.push_back(QLine(x, top, x, bottom));
+            }
 
     }
-//
-//    for (double x = left; x <= right; x += pxPerSec_ * minor_increment) {
-//
-//        auto atime = x / pxPerSec_;
-//
-//        if(nbSecs % major_increment == 0) {
-//            lines_light.push_back(QLine(x, top, x, bottom + 10));
-//            painter->drawText(QPoint(x + 5, bottom + 20), QString("%1:%2").arg(nbSecs / 60,2,10,QChar('0')).arg(nbSecs % 60,2,10,QChar('0')));
-//        }
-//        else {
-//           lines_dark.push_back(QLine(x, top, x, bottom));
-//        }
-//
-//        exactNbSecs += minor_increment;
-//    }
 
 
     painter->fillRect(QRectF(left,top,right,bottom), _color_background);
@@ -178,14 +162,14 @@ void Timeline::drawTimeline(QPainter *painter, int left, int right, int top, int
     painter->fillRect(QRectF(left,yellowAnnotationOffset_ - 5,right,10), QColor("#64592d"));
 
     // draw calls
-    painter->setPen(_pen_light);
+    painter->setPen(QPen(_color_light));
     painter->drawLines(lines_light.data(), lines_light.size());
     painter->setPen(QPen(_color_light.darker()));
     painter->drawLines(lines_dark.data(), lines_dark.size());
 
 
     // playhead
-    painter->setPen(_pen_playhead);
+    painter->setPen(QPen(_color_playhead, 2));
     painter->drawLine(QLine(left + (elapsedTime_ - startTime_) * pxPerSec_, top, left + (elapsedTime_ - startTime_) * pxPerSec_, bottom));
 
 
