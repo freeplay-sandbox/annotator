@@ -36,6 +36,7 @@ void Annotations::updateCurrentAnnotationEnd(ros::Time time)
     if(next && next->start < time) next->start = time;
 }
 
+
 void Annotations::add(Annotation annotation) {
     annotations.push_back(std::make_shared<Annotation>(annotation));
 
@@ -83,4 +84,17 @@ AnnotationPtr Annotations::getAnnotationAtApprox(ros::Time time)
    }
 
    return nullptr;
+}
+
+YAML::Emitter& operator<< (YAML::Emitter& out, const Annotations& a)
+{
+    out << YAML::BeginSeq;
+    for (const auto& annotation : a.annotations) {
+        out << YAML::BeginMap;
+        out << YAML::Key << AnnotationNames.at(annotation->type);
+        out << YAML::Value << vector<double>{annotation->start.toSec(), annotation->stop.toSec()};
+        out << YAML::EndMap;
+    }
+    out << YAML::EndSeq;
+    return out;
 }

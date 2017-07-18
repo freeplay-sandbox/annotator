@@ -24,6 +24,9 @@ find_package( Boost 1.54 COMPONENTS system REQUIRED )
 
 find_package(Qt5Widgets REQUIRED)
 
+find_package(yaml-cpp REQUIRED)
+include_directories(${YAML_CPP_INCLUDE_DIRS})
+
 find_package(catkin REQUIRED COMPONENTS 
         audio_common_msgs
         rosbag
@@ -51,6 +54,7 @@ add_executable(${PROJECT_NAME} ${SRC} src/annotatorwindow.ui ${HEADERS_MOC} ${HE
 target_link_libraries(${PROJECT_NAME}
                       Qt5::Widgets
                       ${catkin_LIBRARIES} 
+                      ${YAML_CPP_LIBRARIES}
                       ${OpenCV_LIBRARIES}
                       ${GSTREAMER_LIBRARIES})
 

@@ -26,7 +26,11 @@ class Timeline : public QWidget {
 
     Q_SLOT void newAnnotation(StreamType stream, AnnotationType annotation);
 
-   protected:
+    Q_SLOT void saveToFile(const std::string &path);
+
+    Q_SLOT void loadFromFile(const std::string &path);
+
+protected:
     virtual void paintEvent(QPaintEvent *event) override;
     virtual void keyPressEvent(QKeyEvent* event) override;
     virtual void mousePressEvent(QMouseEvent* event) override;
@@ -60,6 +64,8 @@ class Timeline : public QWidget {
     std::vector<std::shared_ptr<FreeAnnotationWidget>> freeAnnotations;
     void placeFreeAnnotations();
     void drawTimeline(QPainter *painter, int left, int right, int top, int bottom);
+
+    std::string annotationPath;
 };
 
 #endif

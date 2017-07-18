@@ -1,6 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
 #include <cmath>
+#include <QApplication>
 #include <QColor>
 #include <QPainter>
 #include <QGraphicsTextItem>
@@ -9,10 +10,21 @@
 #include <QDebug>
 #include <algorithm>
 #include <iostream>
+#include <fstream>
+#include <QFileDialog>
+
+#include <yaml-cpp/yaml.h>
+
+#include "timeline.hpp"
 
 using namespace std;
 
-#include "timeline.hpp"
+AnnotationType annotationFromName(const std::string& name) {
+    for (const auto& kv : AnnotationNames) {
+        if (kv.second == name) return kv.first;
+    }
+    throw std::range_error("unknown annotation type " + name);
+}
 
 Timeline::Timeline(QWidget *parent):
           timescale_(1.),
@@ -71,6 +83,58 @@ void Timeline::newAnnotation(StreamType stream, AnnotationType annotationtype)
     default:
         break;
     }
+}
+
+void Timeline::loadFromFile(const string& path)
+{
+    qDebug() << "Loading " << QString::fromStdString(path);
+
+    YAML::Node node = YAML::LoadFile(path);
+
+    emit togglePause();
+
+    purpleAnnotations.clear();
+    yellowAnnotations.clear();
+    generalAnnotations.clear();
+
+    for (const auto& as : node["purple"]) {
+        for (const auto& a : as) {
+            auto type = annotationFromName(a.first.as<string>());
+            auto ts = a.second.as<vector<double>>();
+            purpleAnnotations.add({type, ros::Time(ts[0]), ros::Time(ts[1])});
+        }
+    }
+    for (const auto& as : node["yellow"]) {
+        for (const auto& a : as) {
+            auto type = annotationFromName(a.first.as<string>());
+            auto ts = a.second.as<vector<double>>();
+            yellowAnnotations.add({type, ros::Time(ts[0]), ros::Time(ts[1])});
+        }
+    }
+    for (const auto& as : node["general"]) {
+        for (const auto& a : as) {
+            auto type = annotationFromName(a.first.as<string>());
+            auto ts = a.second.as<vector<double>>();
+            generalAnnotations.add({type, ros::Time(ts[0]), ros::Time(ts[1])});
+        }
+    }
+
+    update();
+}
+
+void Timeline::saveToFile(const string& path)
+{
+    YAML::Emitter out;
+
+    out << YAML::BeginMap;
+    out << YAML::Key << "purple" << YAML::Value << purpleAnnotations;
+    out << YAML::Key << "yellow" << YAML::Value << yellowAnnotations;
+    out << YAML::Key << "general" << YAML::Value << generalAnnotations;
+    out << YAML::EndMap;
+
+    ofstream fout(path);
+    fout << out.c_str();
+    qDebug() << "Saved to " << QString::fromStdString(path);
 }
 
 void Timeline::paintEvent(QPaintEvent *event)
@@ -211,6 +275,7 @@ void Timeline::drawTimeline(QPainter *painter, int left, int right, int top, int
 void Timeline::keyPressEvent(QKeyEvent *event) {
 
     switch (event->key()) {
+
     case Qt::Key_Space:
         emit togglePause();
         break;
@@ -237,7 +302,22 @@ void Timeline::keyPressEvent(QKeyEvent *event) {
         purpleAnnotations.add({AnnotationType::PASSIVE, current_, current_});
         break;
     case Qt::Key_S:
-        purpleAnnotations.add({AnnotationType::ADULTSEEKING, current_, current_});
+        if(QApplication::keyboardModifiers() && Qt::ControlModifier) // ctrl+s
+        {
+            if (annotationPath.empty()) {
+                emit togglePause();
+                QString fileName = QFileDialog::getSaveFileName(this, tr("Save annotations to..."),
+                                                                "",
+                                                                tr("Annotations (*.yaml)"));
+                emit togglePause();
+                annotationPath = fileName.toStdString();
+            }
+
+            if (!annotationPath.empty()) saveToFile(annotationPath);
+        }
+        else {
+            purpleAnnotations.add({AnnotationType::ADULTSEEKING, current_, current_});
+        }
         break;
      case Qt::Key_D:
         purpleAnnotations.add({AnnotationType::IRRELEVANT, current_, current_});
@@ -250,7 +330,19 @@ void Timeline::keyPressEvent(QKeyEvent *event) {
         yellowAnnotations.add({AnnotationType::HOSTILE, current_, current_});
         break;
     case Qt::Key_O:
-        yellowAnnotations.add({AnnotationType::ASSERTIVE, current_, current_});
+        if(QApplication::keyboardModifiers() && Qt::ControlModifier) // ctrl+o
+        {
+            emit togglePause();
+            QString fileName = QFileDialog::getOpenFileName(this, tr("Load annotations"),
+                                                            "",
+                                                            tr("Annotations (*.yaml)"));
+            emit togglePause();
+            annotationPath = fileName.toStdString();
+            if (!annotationPath.empty()) loadFromFile(annotationPath);
+        }
+        else {
+            yellowAnnotations.add({AnnotationType::ASSERTIVE, current_, current_});
+        }
         break;
     case Qt::Key_J:
         yellowAnnotations.add({AnnotationType::PASSIVE, current_, current_});

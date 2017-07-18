@@ -10,6 +10,8 @@
 #include <QBrush>
 #include <ros/time.h>
 
+#include <yaml-cpp/yaml.h>
+
 enum class StreamType {PURPLE, YELLOW, GLOBAL};
 
 enum class AnnotationType {OTHER=0,
@@ -19,6 +21,15 @@ enum class AnnotationType {OTHER=0,
                            PASSIVE,
                            ADULTSEEKING,
                            IRRELEVANT};
+
+const std::map<AnnotationType, std::string> AnnotationNames { {AnnotationType::OTHER,"other"},
+                                                        {AnnotationType::HOSTILE,"hostile"},
+                                                        {AnnotationType::PROSOCIAL,"prosocial"},
+                                                        {AnnotationType::ASSERTIVE,"assertive"},
+                                                        {AnnotationType::PASSIVE,"passive"},
+                                                        {AnnotationType::ADULTSEEKING,"adultseeking"},
+                                                        {AnnotationType::IRRELEVANT,"irrelevant"}};
+
 
 struct Annotation
 {
@@ -37,6 +48,7 @@ class Annotations
 public:
     void updateCurrentAnnotationEnd(ros::Time time);
 
+    friend YAML::Emitter& operator<< (YAML::Emitter& out, const Annotations& a);
 
     typedef typename std::vector<AnnotationPtr>::iterator iterator;
     typedef typename std::vector<AnnotationPtr>::const_iterator const_iterator;
@@ -49,6 +61,8 @@ public:
     const_iterator cend() const {return annotations.cend();}
 
     void add(Annotation annotation);
+    void clear() {annotations.clear();}
+
 private:
 
     AnnotationPtr getAnnotationAt(ros::Time time);
@@ -57,5 +71,6 @@ private:
     std::vector<AnnotationPtr> annotations;
 
 };
+
 
 #endif // ANNOTATION_H
