@@ -16,6 +16,7 @@ void Converter::queue(const cv::Mat &frame) {
 
 void Converter::process(cv::Mat frame) {
     //cv::resize(frame, frame, cv::Size(), 0.3, 0.3, cv::INTER_AREA);
+    if (rotate_) cv::rotate(frame,frame,rotateCode_);
     cv::cvtColor(frame, frame, CV_BGR2RGB);
     const QImage image(frame.data, frame.cols, frame.rows, frame.step,
                        QImage::Format_RGB888, &matDeleter, new cv::Mat(frame));
@@ -30,7 +31,7 @@ void Converter::timerEvent(QTimerEvent *ev) {
     m_timer.stop();
 }
 
-Converter::Converter(QObject *parent) : QObject(parent) {}
+Converter::Converter(QObject *parent) : QObject(parent), rotate_(false) {}
 
 void Converter::setProcessAll(bool all) { m_processAll = all; }
 

@@ -67,7 +67,9 @@ int main(int argc, char *argv[])
     ImageViewer *purpleView = aw.findChild<ImageViewer*>("purpleView");
     ImageViewer *yellowView = aw.findChild<ImageViewer*>("yellowView");
     ImageViewer *sandtrayView = aw.findChild<ImageViewer*>("sandtrayView");
+
     Converter envConverter, purpleConverter, yellowConverter, sandtrayConverter;
+    sandtrayConverter.applyRotation(2); // Rotate 270 degrees clockwise
 
 
     BagReader bagreader;

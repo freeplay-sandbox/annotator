@@ -93,12 +93,12 @@ QWidget#centralWidget &gt; QPushButton {background-color: rgb(0,0,0)}</string>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="ImageViewer" name="purpleView" native="true">
+       <widget class="ImageViewer" name="yellowView" native="true">
         <property name="autoFillBackground">
          <bool>false</bool>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: rgb(96, 83, 106);</string>
+         <string notr="true">background-color: rgb(123, 123, 75);</string>
         </property>
        </widget>
       </item>
@@ -113,12 +113,12 @@ QWidget#centralWidget &gt; QPushButton {background-color: rgb(0,0,0)}</string>
        </widget>
       </item>
       <item>
-       <widget class="ImageViewer" name="yellowView" native="true">
+       <widget class="ImageViewer" name="purpleView" native="true">
         <property name="autoFillBackground">
          <bool>false</bool>
         </property>
         <property name="styleSheet">
-         <string notr="true">background-color: rgb(123, 123, 75);</string>
+         <string notr="true">background-color: rgb(96, 83, 106);</string>
         </property>
        </widget>
       </item>

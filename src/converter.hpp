@@ -20,9 +20,13 @@ class Converter : public QObject {
 
     void timerEvent(QTimerEvent * ev);
 
+    bool rotate_;
+    int rotateCode_;
+
 public:
     explicit Converter(QObject * parent = nullptr);
     void setProcessAll(bool all);
+    void applyRotation(int rotateCode) {rotate_=true; rotateCode_=rotateCode;}
     Q_SIGNAL void imageReady(const QImage &);
     Q_SLOT void processFrame(const cv::Mat & frame);
 };
