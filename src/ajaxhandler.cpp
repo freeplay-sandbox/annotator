@@ -52,7 +52,13 @@ void AjaxHandler::handle_request(const request& request, reply& response)
     }
 
     const string ANNOTATION("annotation=");
+    const string PAUSE("pause");
+    const string ISPAUSED("ispaused");
+    const string RESUME("resume");
+    const string JUMPBY("jumpby=");
+    const string JUMPTO("jumpto=");
 
+    cout << request_path << endl;
     if (request_path.find(ANNOTATION) != string::npos)
     {
         string query = request_path.substr(request_path.find(ANNOTATION) + ANNOTATION.size());
@@ -65,46 +71,82 @@ void AjaxHandler::handle_request(const request& request, reply& response)
         response = process_annotation(root);
         return;
     }
-
-    // not processing an annotation -> then serve files!
-
-    // If path ends in slash (i.e. is a directory) then add "index.html".
-    if (request_path[request_path.size() - 1] == '/')
+    else if (request_path.find(ISPAUSED) != string::npos)
     {
+        response = reply::json_reply(paused_ ? true : false);
+        return;
+    }
+    else if (request_path.find(PAUSE) != string::npos)
+    {
+        emit pause();
+        response = reply::json_reply("true");
+        return;
+    }
+    else if (request_path.find(RESUME) != string::npos)
+    {
+        emit resume();
+        response = reply::json_reply("true");
+        return;
+    }
+    else if (request_path.find(JUMPBY) != string::npos)
+    {
+        string time = request_path.substr(request_path.find(JUMPBY) + JUMPBY.size());
+        emit jumpBy(stoi(time));
+        response = reply::json_reply("true");
+        return;
+   }
+    else if (request_path.find(JUMPTO) != string::npos)
+    {
+        string time = request_path.substr(request_path.find(JUMPTO) + JUMPTO.size());
+        emit jumpTo(stoi(time));
+        response = reply::json_reply("true");
+        return;
+  }
+
+    // not processing an AJAX request -> then serve files!
+    else {
+
+
+        // If path ends in slash (i.e. is a directory) then add "index.html".
+        if (request_path[request_path.size() - 1] == '/')
+        {
             request_path += "index.html";
-    }
+        }
 
-    // Determine the file extension.
-    std::size_t last_slash_pos = request_path.find_last_of("/");
-    std::size_t last_dot_pos = request_path.find_last_of(".");
-    std::string extension;
-    if (last_dot_pos != std::string::npos && last_dot_pos > last_slash_pos)
-    {
+        // Determine the file extension.
+        std::size_t last_slash_pos = request_path.find_last_of("/");
+        std::size_t last_dot_pos = request_path.find_last_of(".");
+        std::string extension;
+        if (last_dot_pos != std::string::npos && last_dot_pos > last_slash_pos)
+        {
             extension = request_path.substr(last_dot_pos + 1);
-    }
+        }
 
-    // Open the file to send back.
-    std::string full_path = doc_root_ + request_path;
-    std::ifstream is(full_path.c_str(), std::ios::in | std::ios::binary);
-    if (!is)
-    {
+        // Open the file to send back.
+        std::string full_path = doc_root_ + request_path;
+        std::ifstream is(full_path.c_str(), std::ios::in | std::ios::binary);
+        if (!is)
+        {
             response = reply::stock_reply(reply::not_found);
             return;
+        }
+
+        // Fill out the reply to be sent to the client.
+        response.status = reply::ok;
+        char buf[512];
+        while (is.read(buf, sizeof(buf)).gcount() > 0)
+            response.content.append(buf, is.gcount());
+        response.headers.resize(2);
+        response.headers[0].name = "Content-Length";
+        response.headers[0].value = std::to_string(response.content.size());
+        response.headers[1].name = "Content-Type";
+        response.headers[1].value = mime_types::extension_to_type(extension);
+
     }
 
-    // Fill out the reply to be sent to the client.
-    response.status = reply::ok;
-    char buf[512];
-    while (is.read(buf, sizeof(buf)).gcount() > 0)
-            response.content.append(buf, is.gcount());
-    response.headers.resize(2);
-    response.headers[0].name = "Content-Length";
-    response.headers[0].value = std::to_string(response.content.size());
-    response.headers[1].name = "Content-Type";
-    response.headers[1].value = mime_types::extension_to_type(extension);
-
-
 }
+
+void AjaxHandler::paused() {cout << "paused!" << endl;paused_=true;}
 
 reply AjaxHandler::process_annotation(const Json::Value& msg)
 {

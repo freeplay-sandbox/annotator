@@ -26,21 +26,34 @@
         <script src="js/materialize.min.js"></script>
 
 
-        <!--
-            <div class="navbar-fixed">
-            <nav>
-            <div class="nav-wrapper">
-            <ul class="right">
-            <li id="nav-records" class="active"><a onclick="switchTo('records')"><i class="material-icons left">assignment_ind</i> Records</a></li>
-            <li id="nav-status"><a onclick="switchTo('status')"><i class="material-icons left">search</i> Status</a></li>
-            <li id="nav-manage"><a onclick="switchTo('manage')"><i class="material-icons left">mode_edit</i> Manage</a></li>
-            <li><a onclick="document.documentElement.mozRequestFullScreen();"><i class="fa fa-arrows-alt"></i></a></li>
-            </ul>
+        <div class="navbar-fixed">
+        <nav>
+        <div class="nav-wrapper">
+        <ul class="right">
+<!--        <li id="nav-records" class="active"><a onclick="switchTo('records')"><i class="material-icons left">assignment_ind</i> Records</a></li>
+        <li id="nav-status"><a onclick="switchTo('status')"><i class="material-icons left">search</i> Status</a></li>
+        <li><a onclick="save()"><i class="fa fa-hdd-o fa-3x"></i></a></li>
+-->
+        <li><a onclick="document.documentElement.webkitRequestFullscreen();document.documentElement.mozRequestFullScreen();"><i class="fa fa-arrows-alt fa-3x"></i></a></li>
+        </ul>
+        </div>
+        </nav>
+        </div>
+        <p>
+        <div class="container">
+            <div class="row center">
+                <a class="waves-effect teal btn-large" onclick="jumpto(0)"><i class="fa fa-step-backward"></i></a>
+                <a class="waves-effect light-green btn-large" onclick="jumpby(-10)"><i class="fa fa-backward"></i> 10</a>
+                <a class="waves-effect lime btn-large" onclick="jumpby(-1)"><i class="fa fa-backward"></i> 1</a>
+                <a class="waves-effect orange btn-large" onclick="togglepause()"><i id="pausebtn" class="fa fa-pause"></i></a>
+                <a class="waves-effect lime btn-large" onclick="jumpby(1)"><i class="fa fa-forward"></i> 1</a>
+                <a class="waves-effect light-green btn-large" onclick="jumpby(10)"><i class="fa fa-forward"></i> 10</a>
+                <a class="waves-effect teal btn-large" onclick="jumpto(-1)"><i class="fa fa-step-forward"></i></a>
             </div>
-            </nav>
-            </div>
-        -->
+        </div>
+        </p>
 
+        <p>
         <div class="container">
             <div class="row">
                 <div id="purple-participant" class="center col s4" style="border: 1px solid #c0c0c0;">
@@ -66,14 +79,11 @@
                 </div>
             </div>
         </div>
+        </p>
 
 <script>
 
-
-function annotate(stream, annotation) {
-
-    var url = "http://" + window.location.hostname +':8080?annotation={"stream":"' + stream + '", "type":"' + annotation + '"}';
-
+function performAjax(url) {
 
     $.ajax({
         url: url,
@@ -84,6 +94,79 @@ function annotate(stream, annotation) {
         }
 
     });
+}
+
+var ispaused = false;
+
+function getpaused() {
+
+    var url = "http://" + window.location.hostname +':8080?ispaused';
+
+    $.ajax({
+        url: url,
+        dataType: "json",
+        context: this,
+        success: function(msg) {
+            console.log(msg);
+            ispaused = msg;
+
+            if(ispaused) {
+                $("#pausebtn").removeClass("fa-pause");
+                $("#pausebtn").addClass("fa-play");
+            }
+            else {
+                $("#pausebtn").removeClass("fa-play");
+                $("#pausebtn").addClass("fa-pause");
+            }
+        }
+
+    });
+}
+
+getpaused();
+
+function togglepause() {
+
+    if(ispaused) {
+        var url = "http://" + window.location.hostname +':8080?resume';
+        $("#pausebtn").removeClass("fa-pause");
+        $("#pausebtn").addClass("fa-play");
+    }
+    else {
+        var url = "http://" + window.location.hostname +':8080?pause';
+        $("#pausebtn").removeClass("fa-play");
+        $("#pausebtn").addClass("fa-pause");
+    }
+    $.ajax({
+        url: url,
+        dataType: "json",
+        context: this,
+        success: function(msg) {
+            console.log("->now, getpaused");
+            getpaused();
+        }
+
+    });
+}
+
+
+function jumpto(time) {
+
+    var url = "http://" + window.location.hostname +':8080?jumpto=' + time;
+    performAjax(url);
+}
+
+
+function jumpby(time) {
+
+    var url = "http://" + window.location.hostname +':8080?jumpby=' + time;
+    performAjax(url);
+}
+
+function annotate(stream, annotation) {
+
+    var url = "http://" + window.location.hostname +':8080?annotation={"stream":"' + stream + '", "type":"' + annotation + '"}';
+    performAjax(url);
 }
 
 </script>

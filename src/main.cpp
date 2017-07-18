@@ -122,7 +122,15 @@ int main(int argc, char *argv[])
 
     QObject::connect(timeline, &Timeline::timeJump, &bagreader, &BagReader::setPlayTime);
 
+    // HTTP server
+
     QObject::connect(&s.request_handler, &AjaxHandler::annotationReceived, timeline, &Timeline::newAnnotation);
+    QObject::connect(&s.request_handler, &AjaxHandler::pause, &bagreader, &BagReader::pause);
+    QObject::connect(&s.request_handler, &AjaxHandler::resume, &bagreader, &BagReader::resume);
+    QObject::connect(&s.request_handler, &AjaxHandler::jumpBy, &bagreader, &BagReader::jumpBy);
+    QObject::connect(&s.request_handler, &AjaxHandler::jumpTo, &bagreader, &BagReader::jumpTo);
+    QObject::connect(&bagreader, &BagReader::paused, &s.request_handler, &AjaxHandler::paused );
+    QObject::connect(&bagreader, &BagReader::resumed, &s.request_handler, &AjaxHandler::resumed);
 
 
     // buttons
@@ -150,8 +158,8 @@ int main(int argc, char *argv[])
 
     // Load bag file and start!
 
-    //aw.showFullScreen();
-    aw.show();
+    aw.showFullScreen();
+    //aw.show();
 
     bagreader.loadBag("/home/slemaignan/freeplay_sandox/data/2017-06-12-143746652201/freeplay.bag");
     //bagreader.loadBag("/home/skadge/freeplay_sandox/data/2017-05-18-145157833880/freeplay.bag");
