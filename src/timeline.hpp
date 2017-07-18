@@ -6,6 +6,7 @@
 
 #include <QWidget>
 #include <QPen>
+#include <QTimer>
 
 #include <ros/time.h>
 
@@ -65,6 +66,7 @@ protected:
     void placeFreeAnnotations();
     void drawTimeline(QPainter *painter, int left, int right, int top, int bottom);
 
+    QTimer autosaveTimer;
     std::string annotationPath;
 };
 

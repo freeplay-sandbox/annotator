@@ -28,12 +28,16 @@ AnnotationType annotationFromName(const std::string& name) {
 
 Timeline::Timeline(QWidget *parent):
           timescale_(1.),
+          autosaveTimer(this),
+          annotationPath("/tmp/freeplay-annotations.yaml"),
           _color_background(QColor("#393939")),
           _color_playhead(QColor("#FF2F00")),
           _color_light(QColor("#7F7F7FAA")),
           _color_bg_text(QColor("#a1a1a1")),
           _brush_background(_color_background)
 {
+    connect(&autosaveTimer, &QTimer::timeout, [&](){saveToFile("");});
+    autosaveTimer.start(1000);
 }
 
 void Timeline::initialize(ros::Time begin, ros::Time end)
@@ -124,6 +128,12 @@ void Timeline::loadFromFile(const string& path)
 
 void Timeline::saveToFile(const string& path)
 {
+
+    if(path.empty() && annotationPath.empty()) return;
+
+    auto actualpath = path;
+    if(actualpath.empty()) actualpath = annotationPath;
+
     YAML::Emitter out;
 
     out << YAML::BeginMap;
@@ -132,9 +142,9 @@ void Timeline::saveToFile(const string& path)
     out << YAML::Key << "general" << YAML::Value << generalAnnotations;
     out << YAML::EndMap;
 
-    ofstream fout(path);
+    ofstream fout(actualpath);
     fout << out.c_str();
-    qDebug() << "Saved to " << QString::fromStdString(path);
+    qDebug() << "Saved to " << QString::fromStdString(actualpath);
 }
 
 void Timeline::paintEvent(QPaintEvent *event)
@@ -304,16 +314,16 @@ void Timeline::keyPressEvent(QKeyEvent *event) {
     case Qt::Key_S:
         if(QApplication::keyboardModifiers() && Qt::ControlModifier) // ctrl+s
         {
-            if (annotationPath.empty()) {
-                emit togglePause();
-                QString fileName = QFileDialog::getSaveFileName(this, tr("Save annotations to..."),
-                                                                "",
-                                                                tr("Annotations (*.yaml)"));
-                emit togglePause();
-                annotationPath = fileName.toStdString();
-            }
+            emit togglePause();
+            QString fileName = QFileDialog::getSaveFileName(this, tr("Save annotations to..."),
+                                    "",
+                                    tr("Annotations (*.yaml)"));
+            emit togglePause();
 
-            if (!annotationPath.empty()) saveToFile(annotationPath);
+            if(!fileName.isEmpty()) {
+                annotationPath = fileName.toStdString();
+                saveToFile(annotationPath);
+            }
         }
         else {
             purpleAnnotations.add({AnnotationType::ADULTSEEKING, current_, current_});
@@ -337,8 +347,10 @@ void Timeline::keyPressEvent(QKeyEvent *event) {
                                                             "",
                                                             tr("Annotations (*.yaml)"));
             emit togglePause();
-            annotationPath = fileName.toStdString();
-            if (!annotationPath.empty()) loadFromFile(annotationPath);
+            if(!fileName.isEmpty()) {
+                annotationPath = fileName.toStdString();
+                loadFromFile(annotationPath);
+            }
         }
         else {
             yellowAnnotations.add({AnnotationType::ASSERTIVE, current_, current_});
