@@ -4,6 +4,7 @@
 #include <QtWidgets>
 #include <QTimer>
 #include <QPushButton>
+#include <QSettings>
 
 #include <opencv2/opencv.hpp>
 #include <ros/time.h>
@@ -163,8 +164,18 @@ int main(int argc, char *argv[])
     //aw.showFullScreen();
     aw.show();
 
-    bagreader.loadBag("/home/slemaignan/freeplay_sandox/data/2017-06-12-143746652201/freeplay.bag");
+    //bagreader.loadBag("/home/slemaignan/freeplay_sandox/data/2017-06-12-143746652201/freeplay.bag");
     //bagreader.loadBag("/home/skadge/freeplay_sandox/data/2017-05-18-145157833880/freeplay.bag");
+    QSettings settings("PlymouthUniversity", "FreeplayDatasetAnnotator");
+
+    QString recent = settings.value("recent").toString();
+    QString fileName = QFileDialog::getOpenFileName(nullptr, "Load bag file",
+                                                    recent,
+                                                    "bag file (*.bag)");
+    if(fileName.isEmpty()) {return 1;}
+        
+    settings.setValue("recent", fileName);
+    bagreader.loadBag(fileName.toStdString());
 
     QMetaObject::invokeMethod(&bagreader, "start");
 
