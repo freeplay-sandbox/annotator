@@ -51,57 +51,57 @@ main {
             <!-- TASK ENGAGEMENT -->
             <div class="row">
                 <div class="center col s5" style="background-color: #fce97e;">
-                        <p> <a class="waves-effect green btn btn-size" onclick="annotate('yellow', 'goaloriented')">Goal orien.</a>
-                            <a class="waves-effect amber darken-4 btn btn-size" onclick="annotate('yellow', 'aimless')">Aimless</a>
-                        <p> <a class="waves-effect red lighten-2 btn btn-size" onclick="annotate('yellow', 'adultseeking')">Adult seek</a>
-                            <a class="waves-effect blue lighten-5 black-text btn btn-size" onclick="annotate('yellow', 'noplay')">No play</a>
+                        <p> <a id="goaloriented-yellow" class="waves-effect green btn btn-size" onclick="annotate('yellow', 'goaloriented')">Goal orien.</a>
+                            <a id="aimless-yellow" class="waves-effect amber darken-4 btn btn-size" onclick="annotate('yellow', 'aimless')">Aimless</a>
+                        <p> <a id="adultseeking-yellow" class="waves-effect red lighten-2 btn btn-size" onclick="annotate('yellow', 'adultseeking')">Adult seek</a>
+                            <a id="noplay-yellow" class="waves-effect blue lighten-5 black-text btn btn-size" onclick="annotate('yellow', 'noplay')">No play</a>
                 </div>
                 <div class="col s2"></div>
                 <div class="center col s5" style="background-color:#ad7fa8;">
-                        <p> <a class="waves-effect amber darken-4 btn btn-size" onclick="annotate('purple', 'aimless')">Aimless</a>
-                            <a class="waves-effect green btn btn-size" onclick="annotate('purple', 'goaloriented')">Goal orien.</a>
-                        <p> <a class="waves-effect blue lighten-5 black-text btn btn-size" onclick="annotate('purple', 'noplay')">No play</a>
-                            <a class="waves-effect red lighten-2 btn btn-size" onclick="annotate('purple', 'adultseeking')">Adult seek</a>
+                        <p> <a id="aimless-purple" class="waves-effect amber darken-4 btn btn-size" onclick="annotate('purple', 'aimless')">Aimless</a>
+                            <a id="goaloriented-purple" class="waves-effect green btn btn-size" onclick="annotate('purple', 'goaloriented')">Goal orien.</a>
+                        <p> <a id="noplay-purple" class="waves-effect blue lighten-5 black-text btn btn-size" onclick="annotate('purple', 'noplay')">No play</a>
+                            <a id="adultseeking-purple" class="waves-effect red lighten-2 btn btn-size" onclick="annotate('purple', 'adultseeking')">Adult seek</a>
                 </div>
             </div>
 
             <!-- SOCIAL ENGAGEMENT -->
             <div class="row">
                 <div class="center col s5" style="background-color: #fce97e;">
-                    <p> <a class="waves-effect indigo lighten-3 btn btn-size" onclick="annotate('yellow', 'solitary')">Solitary</a>
-                        <a class="waves-effect cyan btn btn-size" onclick="annotate('yellow', 'onlooker')">Onlooker</a>
+                    <p> <a id="solitary-yellow" class="waves-effect indigo lighten-3 btn btn-size" onclick="annotate('yellow', 'solitary')">Solitary</a>
+                        <a id="onlooker-yellow" class="waves-effect cyan btn btn-size" onclick="annotate('yellow', 'onlooker')">Onlooker</a>
                 </div>
                 <div class="col s2"></div>
                 <div class="center col s5" style="background-color:#ad7fa8;">
-                    <p> <a class="waves-effect cyan btn btn-size" onclick="annotate('purple', 'onlooker')">Onlooker</a>
-                        <a class="waves-effect indigo lighten-3 btn btn-size" onclick="annotate('purple', 'solitary')">Solitary</a>
+                    <p> <a id="onlooker-purple" class="waves-effect cyan btn btn-size" onclick="annotate('purple', 'onlooker')">Onlooker</a>
+                        <a id="solitary-purple" class="waves-effect indigo lighten-3 btn btn-size" onclick="annotate('purple', 'solitary')">Solitary</a>
                 </div>
             </div>
 
             <div class="row">
                 <div class="center col s12" style="background-color: white;">
-                    <p> <a class="waves-effect lime black-text lighten-3 btn btn-size" onclick="annotate('both', 'parallel')">Parallel</a>
-                        <a class="waves-effect yellow black-text btn btn-size" onclick="annotate('both', 'associative')">Associative</a>
-                        <a class="waves-effect amber black-text btn btn-size" onclick="annotate('both', 'cooperative')">Cooperative</a>
+                    <p> <a id="parallel-both" class="waves-effect lime black-text lighten-3 btn btn-size" onclick="annotate('both', 'parallel')">Parallel</a>
+                        <a id="associative-both" class="waves-effect yellow black-text btn btn-size" onclick="annotate('both', 'associative')">Associative</a>
+                        <a id="cooperative-both" class="waves-effect amber black-text btn btn-size" onclick="annotate('both', 'cooperative')">Cooperative</a>
                 </div>
             </div>
 
             <!-- SOCIAL ATTITUDE -->
             <div class="row">
                 <div class="center col s5" style="background-color: #fce97e;">
-                        <p> <a class="waves-effect green btn btn-size" onclick="annotate('yellow', 'prosocial')">Pro-social</a>
-                            <a class="waves-effect amber darken-4 btn btn-size" onclick="annotate('yellow', 'adversarial')">Adversarial</a>
-                        <p> <a class="waves-effect waves-light btn btn-size" onclick="annotate('yellow', 'assertive')">Assertive</a>
-                            <a class="waves-effect purple btn btn-size" onclick="annotate('yellow', 'frustrated')">Frustrated</a>
-                        <p> <a class="waves-effect blue lighten-5 black-text btn btn-size" onclick="annotate('yellow', 'passive')">Passive</a>
+                        <p> <a id="prosocial-yellow" class="waves-effect green btn btn-size" onclick="annotate('yellow', 'prosocial')">Pro-social</a>
+                            <a id="adversarial-yellow" class="waves-effect amber darken-4 btn btn-size" onclick="annotate('yellow', 'adversarial')">Adversarial</a>
+                        <p> <a id="assertive-yellow" class="waves-effect waves-light btn btn-size" onclick="annotate('yellow', 'assertive')">Assertive</a>
+                            <a id="frustrated-yellow" class="waves-effect purple btn btn-size" onclick="annotate('yellow', 'frustrated')">Frustrated</a>
+                        <p> <a id="passive-yellow" class="waves-effect blue lighten-5 black-text btn btn-size" onclick="annotate('yellow', 'passive')">Passive</a>
                 </div>
                 <div class="col s2"></div>
                 <div class="center col s5" style="background-color:#ad7fa8;">
-                        <p> <a class="waves-effect amber darken-4 btn btn-size" onclick="annotate('purple', 'adversarial')">Adversarial</a>
-                            <a class="waves-effect green btn btn-size" onclick="annotate('purple', 'prosocial')">Pro-social</a>
-                        <p> <a class="waves-effect purple btn btn-size" onclick="annotate('purple', 'frustrated')">Frustrated</a>
-                            <a class="waves-effect waves-light btn btn-size" onclick="annotate('purple', 'assertive')">Assertive</a>
-                        <p> <a class="waves-effect blue lighten-5 black-text btn btn-size" onclick="annotate('purple', 'passive')">Passive</a>
+                        <p> <a id="adversarial-purple" class="waves-effect amber darken-4 btn btn-size" onclick="annotate('purple', 'adversarial')">Adversarial</a>
+                            <a id="prosocial-purple" class="waves-effect green btn btn-size" onclick="annotate('purple', 'prosocial')">Pro-social</a>
+                        <p> <a id="frustrated-purple" class="waves-effect purple btn btn-size" onclick="annotate('purple', 'frustrated')">Frustrated</a>
+                            <a id="assertive-purple" class="waves-effect waves-light btn btn-size" onclick="annotate('purple', 'assertive')">Assertive</a>
+                        <p> <a id="passive-purple" class="waves-effect blue lighten-5 black-text btn btn-size" onclick="annotate('purple', 'passive')">Passive</a>
                 </div>
             </div>
         </p>
@@ -129,6 +129,33 @@ main {
         </footer>
 
 <script>
+
+var activeAnnotationsInterval;
+
+function startActiveAnnotationsUpdate() {
+    activeAnnotationsInterval = setInterval(updateActiveAnnotations, 1000);
+}
+
+function stopActiveAnnotationsUpdate() {
+    clearInterval(activeAnnotationsInterval);
+}
+
+function updateActiveAnnotations() {
+    var url = "http://" + window.location.hostname +':8080?activeannotations';
+
+    $.ajax({
+        url: url,
+        dataType: "json",
+        context: this,
+        success: function(annotations) {
+                for (var a in annotations) {
+                    console.log(a);
+                }
+        }
+        });
+}
+
+//startActiveAnnotationsUpdate();
 
 function performAjax(url) {
 
@@ -212,6 +239,7 @@ function jumpby(time) {
 
 function annotate(stream, annotation) {
 
+    //$("#" + annotation + "-" + stream).addClass("pulse");
     var url = "http://" + window.location.hostname +':8080?annotation={"stream":"' + stream + '", "type":"' + annotation + '"}';
     performAjax(url);
 }
