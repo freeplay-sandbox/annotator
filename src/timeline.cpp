@@ -40,6 +40,12 @@ void Timeline::initialize(ros::Time begin, ros::Time end)
     current_ = begin;
     end_ = end;
 
+    purpleAnnotations.add({AnnotationType::NOPLAY, current_, current_});
+    yellowAnnotations.add({AnnotationType::NOPLAY, current_, current_});
+
+    purpleAnnotations.add({AnnotationType::SOLITARY, current_, current_});
+    yellowAnnotations.add({AnnotationType::SOLITARY, current_, current_});
+
     purpleAnnotations.add({AnnotationType::PASSIVE, current_, current_});
     yellowAnnotations.add({AnnotationType::PASSIVE, current_, current_});
 
@@ -57,7 +63,6 @@ void Timeline::setPlayhead(ros::Time time)
 
    purpleAnnotations.updateCurrentAnnotationEnd(time);
    yellowAnnotations.updateCurrentAnnotationEnd(time);
-   generalAnnotations.updateCurrentAnnotationEnd(time);
 
    current_ = time;
    update();
@@ -68,16 +73,12 @@ void Timeline::newAnnotation(StreamType stream, AnnotationType annotationtype)
 
     Annotation a({annotationtype, current_, current_});
 
-    if(std::find(TaskEngagementAnnotations.begin(), TaskEngagementAnnotations.end(), annotationtype) != TaskEngagementAnnotations.end())
     switch (stream) {
     case StreamType::PURPLE:
         purpleAnnotations.add(a);
         break;
     case StreamType::YELLOW:
         yellowAnnotations.add(a);
-        break;
-    case StreamType::GLOBAL:
-        generalAnnotations.add(a);
         break;
     default:
         break;
@@ -94,7 +95,6 @@ void Timeline::loadFromFile(const string& path)
 
     purpleAnnotations.clear();
     yellowAnnotations.clear();
-    generalAnnotations.clear();
 
     for (const auto& as : node["purple"]) {
         for (const auto& a : as) {
@@ -110,14 +110,6 @@ void Timeline::loadFromFile(const string& path)
             yellowAnnotations.add({type, ros::Time(ts[0]), ros::Time(ts[1])});
         }
     }
-    for (const auto& as : node["general"]) {
-        for (const auto& a : as) {
-            auto type = annotationFromName(a.first.as<string>());
-            auto ts = a.second.as<vector<double>>();
-            generalAnnotations.add({type, ros::Time(ts[0]), ros::Time(ts[1])});
-        }
-    }
-
     update();
 }
 
@@ -134,7 +126,6 @@ void Timeline::saveToFile(const string& path)
     out << YAML::BeginMap;
     out << YAML::Key << "purple" << YAML::Value << purpleAnnotations;
     out << YAML::Key << "yellow" << YAML::Value << yellowAnnotations;
-    out << YAML::Key << "general" << YAML::Value << generalAnnotations;
     out << YAML::EndMap;
 
     ofstream fout(actualpath);
@@ -155,8 +146,7 @@ void Timeline::paintEvent(QPaintEvent *event)
     auto top = rect.top();
     auto bottom = rect.bottom() - 20;
 
-    generalAnnotationOffset_ = top + 10;
-    yellowAnnotationOffset_ = top + 30;
+    yellowAnnotationOffset_ = top + 10;
     purpleAnnotationOffset_ = top + 50;
 
     auto bagLength = (end_ - begin_).toSec();
@@ -179,7 +169,7 @@ void Timeline::placeFreeAnnotations() {
         auto atime = (freeannotation->time - begin_).toSec();
 
         if ( atime > startTime_ && atime < startTime_ + visibleDuration_) {
-            freeannotation->move(atime * pxPerSec_, generalAnnotationOffset_);
+            freeannotation->move(atime * pxPerSec_, 0);
             if(!freeannotation->isVisible()) freeannotation->show();
         }
         else {
@@ -226,54 +216,71 @@ void Timeline::drawTimeline(QPainter *painter, int left, int right, int top, int
     painter->fillRect(QRectF(left,top,right,bottom), _color_background);
 
     // annotation zones
-    painter->fillRect(QRectF(left,generalAnnotationOffset_ - 5,right,10), _color_background.darker());
-    painter->fillRect(QRectF(left,purpleAnnotationOffset_ - 5,right,10), QColor("#4c2d64"));
-    painter->fillRect(QRectF(left,yellowAnnotationOffset_ - 5,right,10), QColor("#64592d"));
+    painter->fillRect(QRectF(left,purpleAnnotationOffset_ - 5,right,30), QColor("#4c2d64"));
+    painter->fillRect(QRectF(left,yellowAnnotationOffset_ - 5,right,30), QColor("#64592d"));
 
-    // draw calls
+    // draw time
     painter->setPen(QPen(_color_light));
     painter->drawLines(lines_light.data(), lines_light.size());
     painter->setPen(QPen(_color_light.darker()));
     painter->drawLines(lines_dark.data(), lines_dark.size());
 
 
-    // playhead
-    painter->setPen(QPen(_color_playhead, 2));
-    painter->drawLine(QLine(left + (elapsedTime_ - startTime_) * pxPerSec_, top, left + (elapsedTime_ - startTime_) * pxPerSec_, bottom));
-
 
     // Drawing of annotations
     int radius = 4;
 
-    for(auto a : generalAnnotations) {
-        auto start = std::max(0., (a->start - begin_).toSec() - startTime_);
-        auto stop = std::min((a->stop - begin_).toSec() - startTime_, startTime_ + visibleDuration_);
-
-        painter->setPen(Annotation::Styles[a->type]);
-        painter->setBrush(Annotation::Styles[a->type].brush());
-        painter->drawEllipse(left - radius/2 + start * pxPerSec_, generalAnnotationOffset_ - radius/2, radius,radius);
-        painter->drawLine(QLine(left + start * pxPerSec_, generalAnnotationOffset_, left + stop * pxPerSec_, generalAnnotationOffset_));
-    }
-
     for(auto a : purpleAnnotations) {
+
+        auto categoryOffset = 0;
+        if(a->category() == AnnotationCategory::SOCIAL_ENGAGEMENT) categoryOffset = 10;
+        else if(a->category() == AnnotationCategory::SOCIAL_ATTITUDE) categoryOffset = 20;
+
+        auto y = purpleAnnotationOffset_ + categoryOffset;
+
         auto start = std::max(0., (a->start - begin_).toSec() - startTime_);
         auto stop = std::min((a->stop - begin_).toSec() - startTime_, startTime_ + visibleDuration_);
 
+        auto x1 = left + start * pxPerSec_;
+        auto x2 = left + stop * pxPerSec_;
+
         painter->setPen(Annotation::Styles[a->type]);
         painter->setBrush(Annotation::Styles[a->type].brush());
-        painter->drawEllipse(left - radius/2 + start * pxPerSec_, purpleAnnotationOffset_ - radius/2, radius,radius);
-        painter->drawLine(QLine(left + start * pxPerSec_, purpleAnnotationOffset_, left + stop * pxPerSec_, purpleAnnotationOffset_));
+        painter->drawLine(x1, y - radius/2, x1, y + radius/2);
+        painter->drawLine(x1, y, x2, y);
+        painter->drawLine(x2, y - radius/2, x2, y + radius/2);
+        if ((x2-x1) > 40) {
+            painter->drawText(QPoint(x1 + 2, y - 5), QString::fromStdString(a->name()));
+        }
     }
 
     for(auto a : yellowAnnotations) {
+
+        auto categoryOffset = 0;
+        if(a->category() == AnnotationCategory::SOCIAL_ENGAGEMENT) categoryOffset = 10;
+        else if(a->category() == AnnotationCategory::SOCIAL_ATTITUDE) categoryOffset = 20;
+
+        auto y = yellowAnnotationOffset_ + categoryOffset;
+
         auto start = std::max(0., (a->start - begin_).toSec() - startTime_);
         auto stop = std::min((a->stop - begin_).toSec() - startTime_, startTime_ + visibleDuration_);
+        auto x1 = left + start * pxPerSec_;
+        auto x2 = left + stop * pxPerSec_;
 
         painter->setPen(Annotation::Styles[a->type]);
         painter->setBrush(Annotation::Styles[a->type].brush());
-        painter->drawEllipse(left - radius/2 + start * pxPerSec_, yellowAnnotationOffset_ - radius/2, radius,radius);
-        painter->drawLine(QLine(left + start * pxPerSec_, yellowAnnotationOffset_, left + stop * pxPerSec_, yellowAnnotationOffset_));
+        painter->drawLine(x1, y - radius/2, x1, y + radius/2);
+        painter->drawLine(x1, y, x2, y);
+        painter->drawLine(x2, y - radius/2, x2, y + radius/2);
+        if ((x2-x1) > 40) {
+            painter->drawText(QPoint(x1 + 2, y - 5), QString::fromStdString(a->name()));
+        }
     }
+    
+    // playhead
+    painter->setPen(QPen(_color_playhead, 2));
+    painter->drawLine(QLine(left + (elapsedTime_ - startTime_) * pxPerSec_, top, left + (elapsedTime_ - startTime_) * pxPerSec_, bottom));
+
 
 }
 

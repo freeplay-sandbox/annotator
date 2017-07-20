@@ -14,6 +14,12 @@
 
 enum class StreamType {PURPLE, YELLOW, GLOBAL};
 
+enum class AnnotationCategory {
+                    TASK_ENGAGEMENT,
+                    SOCIAL_ENGAGEMENT,
+                    SOCIAL_ATTITUDE
+            };
+
 enum class AnnotationType {OTHER=0,
                            GOALORIENTED,
                            AIMLESS,
@@ -32,47 +38,23 @@ enum class AnnotationType {OTHER=0,
                            FRUSTRATED,
                            PASSIVE};
 
-const std::map<AnnotationType, std::string> AnnotationNames {
-                {AnnotationType::OTHER,"other"},
-                {AnnotationType::GOALORIENTED,"goaloriented"},
-                {AnnotationType::AIMLESS,"aimless"},
-                {AnnotationType::ADULTSEEKING,"adultseeking"},
-                {AnnotationType::NOPLAY,"noplay"},
+const std::map<AnnotationType, std::pair<std::string, AnnotationCategory>> AnnotationNames {
+                {AnnotationType::GOALORIENTED, {"goaloriented", AnnotationCategory::TASK_ENGAGEMENT}},
+                {AnnotationType::AIMLESS, {"aimless", AnnotationCategory::TASK_ENGAGEMENT}},
+                {AnnotationType::ADULTSEEKING, {"adultseeking", AnnotationCategory::TASK_ENGAGEMENT}},
+                {AnnotationType::NOPLAY, {"noplay", AnnotationCategory::TASK_ENGAGEMENT}},
 
-                {AnnotationType::SOLITARY,"solitary"},
-                {AnnotationType::ONLOOKER,"onlooker"},
-                {AnnotationType::PARALLEL,"parallel"},
-                {AnnotationType::ASSOCIATIVE,"associative"},
-                {AnnotationType::COOPERATIVE,"cooperative"},
+                {AnnotationType::SOLITARY, {"solitary", AnnotationCategory::SOCIAL_ENGAGEMENT}},
+                {AnnotationType::ONLOOKER, {"onlooker", AnnotationCategory::SOCIAL_ENGAGEMENT}},
+                {AnnotationType::PARALLEL, {"parallel", AnnotationCategory::SOCIAL_ENGAGEMENT}},
+                {AnnotationType::ASSOCIATIVE, {"associative", AnnotationCategory::SOCIAL_ENGAGEMENT}},
+                {AnnotationType::COOPERATIVE, {"cooperative", AnnotationCategory::SOCIAL_ENGAGEMENT}},
 
-                {AnnotationType::PROSOCIAL,"prosocial"},
-                {AnnotationType::ADVERSARIAL,"adversarial"},
-                {AnnotationType::ASSERTIVE,"assertive"},
-                {AnnotationType::FRUSTRATED,"frustrated"},
-                {AnnotationType::PASSIVE,"passive"}
-};
-
-const std::vector<AnnotationType> TaskEngagementAnnotations {
-    AnnotationType::GOALORIENTED,
-    AnnotationType::AIMLESS,
-    AnnotationType::ADULTSEEKING,
-    AnnotationType::NOPLAY
-};
-
-const std::vector<AnnotationType> SocialEngagementAnnotations {
-    AnnotationType::SOLITARY,
-    AnnotationType::ONLOOKER,
-    AnnotationType::PARALLEL,
-    AnnotationType::ASSOCIATIVE,
-    AnnotationType::COOPERATIVE
-};
-
-const std::vector<AnnotationType> SocialAttitudeAnnotations {
-    AnnotationType::PROSOCIAL,
-    AnnotationType::ADVERSARIAL,
-    AnnotationType::ASSERTIVE,
-    AnnotationType::FRUSTRATED,
-    AnnotationType::PASSIVE
+                {AnnotationType::PROSOCIAL, {"prosocial", AnnotationCategory::SOCIAL_ATTITUDE}},
+                {AnnotationType::ADVERSARIAL, {"adversarial", AnnotationCategory::SOCIAL_ATTITUDE}},
+                {AnnotationType::ASSERTIVE, {"assertive", AnnotationCategory::SOCIAL_ATTITUDE}},
+                {AnnotationType::FRUSTRATED, {"frustrated", AnnotationCategory::SOCIAL_ATTITUDE}},
+                {AnnotationType::PASSIVE, {"passive", AnnotationCategory::SOCIAL_ATTITUDE}}
 };
 
 AnnotationType annotationFromName(const std::string& name);
@@ -84,6 +66,9 @@ struct Annotation
     AnnotationType type;
     ros::Time start;
     ros::Time stop;
+
+    std::string name() const {return AnnotationNames.at(type).first;}
+    AnnotationCategory category() const {return AnnotationNames.at(type).second;}
 };
 
 typedef typename std::shared_ptr<Annotation> AnnotationPtr;

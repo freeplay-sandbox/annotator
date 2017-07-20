@@ -26,7 +26,7 @@ std::map<AnnotationType, QPen> Annotation::Styles = {
 
 AnnotationType annotationFromName(const std::string& name) {
     for (const auto& kv : AnnotationNames) {
-        if (kv.second == name) return kv.first;
+        if (kv.second.first == name) return kv.first;
     }
     throw std::range_error("unknown annotation type " + name);
 }
@@ -106,7 +106,7 @@ YAML::Emitter& operator<< (YAML::Emitter& out, const Annotations& a)
     out << YAML::BeginSeq;
     for (const auto& annotation : a.annotations) {
         out << YAML::BeginMap;
-        out << YAML::Key << AnnotationNames.at(annotation->type);
+        out << YAML::Key << AnnotationNames.at(annotation->type).first;
         out << YAML::Value << vector<double>{annotation->start.toSec(), annotation->stop.toSec()};
         out << YAML::EndMap;
     }

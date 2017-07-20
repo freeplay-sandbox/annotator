@@ -52,21 +52,15 @@ protected:
 
     QBrush _brush_background;
 
-    int generalAnnotationOffset_, purpleAnnotationOffset_, yellowAnnotationOffset_;
+    int purpleAnnotationOffset_, yellowAnnotationOffset_;
 
     double elapsedTime_, visibleDuration_, startTime_, pxPerSec_;
 
     ros::Time pointToTimestamp(QPoint point);
 
-    Annotations generalAnnotations;
+    Annotations yellowAnnotations;
+    Annotations purpleAnnotations;
 
-    Annotations yellowTaskEngagementAnnotations;
-    Annotations yellowSocialEngagementAnnotations;
-    Annotations yellowSocialAttitudeAnnotations;
-
-    Annotations purpleTaskEngagementAnnotations;
-    Annotations purpleSocialEngagementAnnotations;
-    Annotations purpleSocialAttitudeAnnotations;
 
 
     std::vector<std::shared_ptr<FreeAnnotationWidget>> freeAnnotations;
