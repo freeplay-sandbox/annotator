@@ -15,21 +15,45 @@
 enum class StreamType {PURPLE, YELLOW, GLOBAL};
 
 enum class AnnotationType {OTHER=0,
-                           HOSTILE,
-                           PROSOCIAL,
-                           ASSERTIVE,
-                           PASSIVE,
+                           GOALORIENTED,
+                           AIMLESS,
                            ADULTSEEKING,
-                           IRRELEVANT};
+                           NOPLAY,
 
-const std::map<AnnotationType, std::string> AnnotationNames { {AnnotationType::OTHER,"other"},
-                                                        {AnnotationType::HOSTILE,"hostile"},
-                                                        {AnnotationType::PROSOCIAL,"prosocial"},
-                                                        {AnnotationType::ASSERTIVE,"assertive"},
-                                                        {AnnotationType::PASSIVE,"passive"},
-                                                        {AnnotationType::ADULTSEEKING,"adultseeking"},
-                                                        {AnnotationType::IRRELEVANT,"irrelevant"}};
+                           SOLITARY,
+                           ONLOOKER,
+                           PARALLEL,
+                           ASSOCIATIVE,
+                           COOPERATIVE,
 
+                           PROSOCIAL,
+                           ADVERSARIAL,
+                           ASSERTIVE,
+                           FRUSTRATED,
+                           PASSIVE};
+
+const std::map<AnnotationType, std::string> AnnotationNames {
+                {AnnotationType::OTHER,"other"},
+                {AnnotationType::GOALORIENTED,"goaloriented"},
+                {AnnotationType::AIMLESS,"aimless"},
+                {AnnotationType::ADULTSEEKING,"adultseeking"},
+                {AnnotationType::NOPLAY,"noplay"},
+
+                {AnnotationType::SOLITARY,"solitary"},
+                {AnnotationType::ONLOOKER,"onlooker"},
+                {AnnotationType::PARALLEL,"parallel"},
+                {AnnotationType::ASSOCIATIVE,"associative"},
+                {AnnotationType::COOPERATIVE,"cooperative"},
+
+                {AnnotationType::PROSOCIAL,"prosocial"},
+                {AnnotationType::ADVERSARIAL,"adversarial"},
+                {AnnotationType::ASSERTIVE,"assertive"},
+                {AnnotationType::FRUSTRATED,"frustrated"},
+                {AnnotationType::PASSIVE,"passive"}
+    };
+
+
+AnnotationType annotationFromName(const std::string& name);
 
 struct Annotation
 {

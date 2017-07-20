@@ -8,13 +8,28 @@ using namespace std;
 const ros::Duration MAX_TIME_TO_MERGE(0.5);
 
 std::map<AnnotationType, QPen> Annotation::Styles = {
-            {AnnotationType::HOSTILE, QPen(QBrush(QColor("#ad1d1d")), 2, Qt::SolidLine)},
-            {AnnotationType::PROSOCIAL, QPen(QBrush(QColor("#1dad75")), 2, Qt::SolidLine)},
-            {AnnotationType::ASSERTIVE, QPen(QBrush(QColor("#6697bd")), 2, Qt::SolidLine)},
-            {AnnotationType::PASSIVE, QPen(QBrush(QColor("#bd9966")), 2, Qt::DashLine)},
-            {AnnotationType::ADULTSEEKING, QPen(QBrush(QColor("#f2ce3e")), 2, Qt::DashLine)},
-            {AnnotationType::IRRELEVANT, QPen(QBrush(QColor("#f2ce3e")), 2, Qt::DotLine)}
+            {AnnotationType::GOALORIENTED, QPen(QBrush(QColor("#4CAF50")), 2, Qt::SolidLine)},
+            {AnnotationType::AIMLESS, QPen(QBrush(QColor("#ff6f00")), 2, Qt::SolidLine)},
+            {AnnotationType::ADULTSEEKING, QPen(QBrush(QColor("#E57373")), 2, Qt::DashLine)},
+            {AnnotationType::NOPLAY, QPen(QBrush(QColor("#E3F2FD")), 2, Qt::DotLine)},
+            {AnnotationType::SOLITARY, QPen(QBrush(QColor("#9fa8da")), 2, Qt::SolidLine)},
+            {AnnotationType::ONLOOKER, QPen(QBrush(QColor("#00bcd4")), 2, Qt::SolidLine)},
+            {AnnotationType::PARALLEL, QPen(QBrush(QColor("#e6ee9c")), 2, Qt::SolidLine)},
+            {AnnotationType::ASSOCIATIVE, QPen(QBrush(QColor("#ffeb3b")), 2, Qt::SolidLine)},
+            {AnnotationType::COOPERATIVE, QPen(QBrush(QColor("#ffc107")), 2, Qt::SolidLine)},
+            {AnnotationType::PROSOCIAL, QPen(QBrush(QColor("#4CAF50")), 2, Qt::SolidLine)},
+            {AnnotationType::ADVERSARIAL, QPen(QBrush(QColor("#ff6f00")), 2, Qt::SolidLine)},
+            {AnnotationType::ASSERTIVE, QPen(QBrush(QColor("#26a69a")), 2, Qt::SolidLine)},
+            {AnnotationType::FRUSTRATED, QPen(QBrush(QColor("#9c27b0")), 2, Qt::SolidLine)},
+            {AnnotationType::PASSIVE, QPen(QBrush(QColor("#E3F2FD")), 2, Qt::DotLine)}
         };
+
+AnnotationType annotationFromName(const std::string& name) {
+    for (const auto& kv : AnnotationNames) {
+        if (kv.second == name) return kv.first;
+    }
+    throw std::range_error("unknown annotation type " + name);
+}
 
 
 void Annotations::updateCurrentAnnotationEnd(ros::Time time)

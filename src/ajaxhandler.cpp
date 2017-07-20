@@ -152,7 +152,6 @@ reply AjaxHandler::process_annotation(const Json::Value& msg)
 {
 
     vector<StreamType> streams;
-    auto type = AnnotationType::IRRELEVANT;
 
     switch(str2int(msg["stream"].asString())) {
     case str2int("global"):
@@ -173,26 +172,7 @@ reply AjaxHandler::process_annotation(const Json::Value& msg)
         return reply::stock_reply(reply::bad_request);
     }
 
-    switch(str2int(msg["type"].asString())) {
-    case str2int("hostile"):
-        type = AnnotationType::HOSTILE;
-        break;
-   case str2int("prosocial"):
-        type = AnnotationType::PROSOCIAL;
-        break;
-    case str2int("assertive"):
-        type = AnnotationType::ASSERTIVE;
-        break;
-    case str2int("passive"):
-        type = AnnotationType::PASSIVE;
-        break;
-    case str2int("adultseeking"):
-        type = AnnotationType::ADULTSEEKING;
-        break;
-    default:
-        qDebug() << "Invalid annotation type: " << QString::fromStdString(msg["type"].asString());
-        return reply::stock_reply(reply::bad_request);
-    }
+    auto type = annotationFromName(msg["type"].asString());
 
     for (auto s : streams) {
         emit annotationReceived(s, type);

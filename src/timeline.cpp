@@ -19,12 +19,6 @@
 
 using namespace std;
 
-AnnotationType annotationFromName(const std::string& name) {
-    for (const auto& kv : AnnotationNames) {
-        if (kv.second == name) return kv.first;
-    }
-    throw std::range_error("unknown annotation type " + name);
-}
 
 Timeline::Timeline(QWidget *parent):
           timescale_(1.),
@@ -303,7 +297,7 @@ void Timeline::keyPressEvent(QKeyEvent *event) {
         purpleAnnotations.add({AnnotationType::PROSOCIAL, current_, current_});
         break;
     case Qt::Key_W:
-        purpleAnnotations.add({AnnotationType::HOSTILE, current_, current_});
+        purpleAnnotations.add({AnnotationType::ADVERSARIAL, current_, current_});
         break;
     case Qt::Key_E:
         purpleAnnotations.add({AnnotationType::ASSERTIVE, current_, current_});
@@ -330,14 +324,14 @@ void Timeline::keyPressEvent(QKeyEvent *event) {
         }
         break;
      case Qt::Key_D:
-        purpleAnnotations.add({AnnotationType::IRRELEVANT, current_, current_});
+        purpleAnnotations.add({AnnotationType::AIMLESS, current_, current_});
         break;
 
     case Qt::Key_U:
         yellowAnnotations.add({AnnotationType::PROSOCIAL, current_, current_});
         break;
     case Qt::Key_I:
-        yellowAnnotations.add({AnnotationType::HOSTILE, current_, current_});
+        yellowAnnotations.add({AnnotationType::ADVERSARIAL, current_, current_});
         break;
     case Qt::Key_O:
         if(QApplication::keyboardModifiers() && Qt::ControlModifier) // ctrl+o
@@ -363,7 +357,7 @@ void Timeline::keyPressEvent(QKeyEvent *event) {
         yellowAnnotations.add({AnnotationType::ADULTSEEKING, current_, current_});
         break;
      case Qt::Key_L:
-        yellowAnnotations.add({AnnotationType::IRRELEVANT, current_, current_});
+        yellowAnnotations.add({AnnotationType::AIMLESS, current_, current_});
         break;
 
         ////// NOT HANDLED -> pass forward
