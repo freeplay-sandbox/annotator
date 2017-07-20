@@ -59,8 +59,15 @@ protected:
     ros::Time pointToTimestamp(QPoint point);
 
     Annotations generalAnnotations;
-    Annotations purpleAnnotations;
-    Annotations yellowAnnotations;
+
+    Annotations yellowTaskEngagementAnnotations;
+    Annotations yellowSocialEngagementAnnotations;
+    Annotations yellowSocialAttitudeAnnotations;
+
+    Annotations purpleTaskEngagementAnnotations;
+    Annotations purpleSocialEngagementAnnotations;
+    Annotations purpleSocialAttitudeAnnotations;
+
 
     std::vector<std::shared_ptr<FreeAnnotationWidget>> freeAnnotations;
     void placeFreeAnnotations();

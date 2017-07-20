@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
     ImageViewer *sandtrayView = aw.findChild<ImageViewer*>("sandtrayView");
 
     Converter envConverter, purpleConverter, yellowConverter, sandtrayConverter;
-    sandtrayConverter.applyRotation(2); // Rotate 270 degrees clockwise
+    //sandtrayConverter.applyRotation(2); // Rotate 270 degrees clockwise
 
 
     BagReader bagreader;
@@ -160,8 +160,8 @@ int main(int argc, char *argv[])
 
     // Load bag file and start!
 
-    aw.showFullScreen();
-    //aw.show();
+    //aw.showFullScreen();
+    aw.show();
 
     bagreader.loadBag("/home/slemaignan/freeplay_sandox/data/2017-06-12-143746652201/freeplay.bag");
     //bagreader.loadBag("/home/skadge/freeplay_sandox/data/2017-05-18-145157833880/freeplay.bag");

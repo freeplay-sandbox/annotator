@@ -52,13 +52,14 @@ void AjaxHandler::handle_request(const request& request, reply& response)
     }
 
     const string ANNOTATION("annotation=");
+    const string ACTIVEANNOTATIONS("activeannotations");
     const string PAUSE("pause");
     const string ISPAUSED("ispaused");
     const string RESUME("resume");
     const string JUMPBY("jumpby=");
     const string JUMPTO("jumpto=");
 
-    cout << request_path << endl;
+    //cout << request_path << endl;
     if (request_path.find(ANNOTATION) != string::npos)
     {
         string query = request_path.substr(request_path.find(ANNOTATION) + ANNOTATION.size());
@@ -69,6 +70,11 @@ void AjaxHandler::handle_request(const request& request, reply& response)
             return;
         }
         response = process_annotation(root);
+        return;
+    }
+    else if (request_path.find(ACTIVEANNOTATIONS) != string::npos)
+    {
+        response = reply::json_reply(paused_ ? true : false);
         return;
     }
     else if (request_path.find(ISPAUSED) != string::npos)
@@ -178,7 +184,7 @@ reply AjaxHandler::process_annotation(const Json::Value& msg)
         emit annotationReceived(s, type);
     }
 
-    qDebug() << "Annotation successfully created";
+    //qDebug() << "Annotation successfully created";
     return reply::json_reply("ok");
     //return reply::stock_reply(reply::accepted);
     //}

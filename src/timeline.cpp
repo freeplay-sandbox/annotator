@@ -68,6 +68,7 @@ void Timeline::newAnnotation(StreamType stream, AnnotationType annotationtype)
 
     Annotation a({annotationtype, current_, current_});
 
+    if(std::find(TaskEngagementAnnotations.begin(), TaskEngagementAnnotations.end(), annotationtype) != TaskEngagementAnnotations.end())
     switch (stream) {
     case StreamType::PURPLE:
         purpleAnnotations.add(a);
@@ -138,7 +139,7 @@ void Timeline::saveToFile(const string& path)
 
     ofstream fout(actualpath);
     fout << out.c_str();
-    qDebug() << "Saved to " << QString::fromStdString(actualpath);
+    //qDebug() << "Saved to " << QString::fromStdString(actualpath);
 }
 
 void Timeline::paintEvent(QPaintEvent *event)

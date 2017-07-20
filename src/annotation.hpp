@@ -50,8 +50,30 @@ const std::map<AnnotationType, std::string> AnnotationNames {
                 {AnnotationType::ASSERTIVE,"assertive"},
                 {AnnotationType::FRUSTRATED,"frustrated"},
                 {AnnotationType::PASSIVE,"passive"}
-    };
+};
 
+const std::vector<AnnotationType> TaskEngagementAnnotations {
+    AnnotationType::GOALORIENTED,
+    AnnotationType::AIMLESS,
+    AnnotationType::ADULTSEEKING,
+    AnnotationType::NOPLAY
+};
+
+const std::vector<AnnotationType> SocialEngagementAnnotations {
+    AnnotationType::SOLITARY,
+    AnnotationType::ONLOOKER,
+    AnnotationType::PARALLEL,
+    AnnotationType::ASSOCIATIVE,
+    AnnotationType::COOPERATIVE
+};
+
+const std::vector<AnnotationType> SocialAttitudeAnnotations {
+    AnnotationType::PROSOCIAL,
+    AnnotationType::ADVERSARIAL,
+    AnnotationType::ASSERTIVE,
+    AnnotationType::FRUSTRATED,
+    AnnotationType::PASSIVE
+};
 
 AnnotationType annotationFromName(const std::string& name);
 
