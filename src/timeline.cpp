@@ -49,8 +49,8 @@ void Timeline::initialize(ros::Time begin, ros::Time end)
     purpleAnnotations.add({AnnotationType::PASSIVE, current_, current_});
     yellowAnnotations.add({AnnotationType::PASSIVE, current_, current_});
 
-    freeAnnotations.push_back(make_shared<FreeAnnotationWidget>(begin_ + ros::Duration(10), FreeAnnotationType::INTERESTING, "hello world"));
-    freeAnnotations.push_back(make_shared<FreeAnnotationWidget>(begin_ + ros::Duration(20), FreeAnnotationType::ISSUE, "hello world issue"));
+    //freeAnnotations.push_back(make_shared<FreeAnnotationWidget>(begin_ + ros::Duration(10), FreeAnnotationType::INTERESTING, "hello world"));
+    //freeAnnotations.push_back(make_shared<FreeAnnotationWidget>(begin_ + ros::Duration(20), FreeAnnotationType::ISSUE, "hello world issue"));
 
     for(auto freeannotation : freeAnnotations) {
         freeannotation->setParent(this);
@@ -161,8 +161,8 @@ void Timeline::paintEvent(QPaintEvent *event)
     auto bottom = rect.bottom() - 20;
 
     generalAnnotationOffset_ = top + 10;
-    purpleAnnotationOffset_ = top + 30;
-    yellowAnnotationOffset_ = top + 50;
+    yellowAnnotationOffset_ = top + 30;
+    purpleAnnotationOffset_ = top + 50;
 
     auto bagLength = (end_ - begin_).toSec();
 
