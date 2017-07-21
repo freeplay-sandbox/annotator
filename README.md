@@ -46,10 +46,10 @@ following interface:
 
 ![Screenshoot of the Web UI](doc/ui.png)
 
-Annotations are automatically saved (cf status bar to see where they are saved).
+Annotations are automatically saved next to the bag file as `<bag
+file>.annotations.yaml` (the status bar indicates the full path to this file).
 
-Keyboard shortcuts
-------------------
+### Keyboard shortcuts
 
 
 - Press `Del` to clear all annotations.
