@@ -150,7 +150,6 @@ void BagReader::processBag()
             ros::Time const& time = m.getTime();
 
             if (time >= bag_end_) {
-                current_ = bag_begin_;
                 pause();
                 emit timeUpdate(current_);
                 emit durationUpdate(current_ - bag_begin_);

@@ -41,14 +41,6 @@ void Timeline::initialize(ros::Time begin, ros::Time end)
     current_ = begin;
     end_ = end;
 
-    purpleAnnotations.add({AnnotationType::NOPLAY, current_, current_});
-    yellowAnnotations.add({AnnotationType::NOPLAY, current_, current_});
-
-    purpleAnnotations.add({AnnotationType::SOLITARY, current_, current_});
-    yellowAnnotations.add({AnnotationType::SOLITARY, current_, current_});
-
-    purpleAnnotations.add({AnnotationType::PASSIVE, current_, current_});
-    yellowAnnotations.add({AnnotationType::PASSIVE, current_, current_});
 
     //freeAnnotations.push_back(make_shared<FreeAnnotationWidget>(begin_ + ros::Duration(10), FreeAnnotationType::INTERESTING, "hello world"));
     //freeAnnotations.push_back(make_shared<FreeAnnotationWidget>(begin_ + ros::Duration(20), FreeAnnotationType::ISSUE, "hello world issue"));
@@ -109,10 +101,24 @@ void Timeline::clearAllAnnotations()
                                    QMessageBox::Yes | QMessageBox::No);
 
     if(ret == QMessageBox::Yes) {
-        purpleAnnotations.clear();
-        yellowAnnotations.clear();
+        resetAnnotations();
     }
     emit timeJump(begin_);
+}
+
+void Timeline::resetAnnotations() {
+        purpleAnnotations.clear();
+        yellowAnnotations.clear();
+
+
+        purpleAnnotations.add({AnnotationType::NOPLAY, begin_, begin_});
+        yellowAnnotations.add({AnnotationType::NOPLAY, begin_, begin_});
+
+        purpleAnnotations.add({AnnotationType::SOLITARY, begin_, begin_});
+        yellowAnnotations.add({AnnotationType::SOLITARY, begin_, begin_});
+
+        purpleAnnotations.add({AnnotationType::PASSIVE, begin_, begin_});
+        yellowAnnotations.add({AnnotationType::PASSIVE, begin_, begin_});
 }
 
 void Timeline::setSavePath(const string &path)

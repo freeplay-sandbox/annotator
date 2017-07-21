@@ -181,6 +181,9 @@ int main(int argc, char *argv[])
     if (annotationPath.exists()) {
         timeline->loadFromFile(annotationPath.filePath().toStdString());
     }
+    else {
+        timeline->resetAnnotations();
+    }
     timeline->setSavePath(annotationPath.filePath().toStdString());
     aw.showAutosavePath(annotationPath.filePath());
 

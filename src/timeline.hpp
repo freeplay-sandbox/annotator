@@ -34,6 +34,8 @@ class Timeline : public QWidget {
 
     Q_SLOT void loadFromFile(const std::string &path);
 
+    void resetAnnotations();
+
 protected:
     virtual void paintEvent(QPaintEvent *event) override;
     virtual void keyPressEvent(QKeyEvent* event) override;
