@@ -88,7 +88,7 @@ void Timeline::newAnnotation(StreamType stream, AnnotationType annotationtype)
 
 void Timeline::clearAllAnnotations()
 {
-    emit togglePause();
+    emit pause();
     auto ret = QMessageBox::warning(this, "Clear all annotations",
                                    "Are you sure you want to clear all annotations?",
                                    QMessageBox::Yes | QMessageBox::No);
@@ -359,11 +359,10 @@ void Timeline::keyPressEvent(QKeyEvent *event) {
     case Qt::Key_O:
         if(QApplication::keyboardModifiers() && Qt::ControlModifier) // ctrl+o
         {
-            emit togglePause();
+            emit pause();
             QString fileName = QFileDialog::getOpenFileName(this, tr("Load annotations"),
                                                             "",
                                                             tr("Annotations (*.yaml)"));
-            emit togglePause();
             if(!fileName.isEmpty()) {
                 annotationPath = fileName.toStdString();
                 loadFromFile(annotationPath);

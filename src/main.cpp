@@ -128,6 +128,7 @@ int main(int argc, char *argv[])
     // HTTP server
 
     QObject::connect(&s.request_handler, &AjaxHandler::annotationReceived, timeline, &Timeline::newAnnotation);
+    QObject::connect(&s.request_handler, &AjaxHandler::clearAllAnnotations, timeline, &Timeline::clearAllAnnotations);
     QObject::connect(&s.request_handler, &AjaxHandler::pause, &bagreader, &BagReader::pause);
     QObject::connect(&s.request_handler, &AjaxHandler::resume, &bagreader, &BagReader::resume);
     QObject::connect(&s.request_handler, &AjaxHandler::jumpBy, &bagreader, &BagReader::jumpBy);
@@ -143,6 +144,7 @@ int main(int argc, char *argv[])
     QObject::connect(&bagreader, &BagReader::resumed, [&](){pauseBtn->setIcon(QIcon::fromTheme("media-playback-pause-symbolic"));});
 
     QObject::connect(timeline, &Timeline::togglePause, &bagreader, &BagReader::togglePause);
+    QObject::connect(timeline, &Timeline::pause, &bagreader, &BagReader::pause);
 
     auto jumpBack10Btn = aw.findChild<QPushButton*>("jumpBack10Btn");
     QObject::connect(jumpBack10Btn, &QPushButton::clicked, [&](){bagreader.jumpBy(-10);});

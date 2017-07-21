@@ -122,6 +122,7 @@ main {
                 </div>
                 <div class="col s1">
 
+                <a alt="Clear all annotations" onclick="clearall()"><i class="fa fa-trash-o fa-3x"></i></a>&nbsp;
                 <a onclick="document.documentElement.webkitRequestFullscreen();document.documentElement.mozRequestFullScreen();"><i class="fa fa-arrows-alt fa-3x"></i></a>
                 </div>
             </div>
@@ -241,6 +242,12 @@ function annotate(stream, annotation) {
 
     //$("#" + annotation + "-" + stream).addClass("pulse");
     var url = "http://" + window.location.hostname +':8080?annotation={"stream":"' + stream + '", "type":"' + annotation + '"}';
+    performAjax(url);
+}
+
+function clearall() {
+
+    var url = "http://" + window.location.hostname +':8080?clearall';
     performAjax(url);
 }
 

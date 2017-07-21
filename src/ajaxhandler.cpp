@@ -58,6 +58,7 @@ void AjaxHandler::handle_request(const request& request, reply& response)
     const string RESUME("resume");
     const string JUMPBY("jumpby=");
     const string JUMPTO("jumpto=");
+    const string CLEARALL("clearall");
 
     //cout << request_path << endl;
     if (request_path.find(ANNOTATION) != string::npos)
@@ -74,7 +75,7 @@ void AjaxHandler::handle_request(const request& request, reply& response)
     }
     else if (request_path.find(ACTIVEANNOTATIONS) != string::npos)
     {
-        response = reply::json_reply(paused_ ? true : false);
+        response = reply::stock_reply(reply::bad_request);
         return;
     }
     else if (request_path.find(ISPAUSED) != string::npos)
@@ -105,6 +106,12 @@ void AjaxHandler::handle_request(const request& request, reply& response)
     {
         string time = request_path.substr(request_path.find(JUMPTO) + JUMPTO.size());
         emit jumpTo(stoi(time));
+        response = reply::json_reply("true");
+        return;
+  }
+    else if (request_path.find(CLEARALL) != string::npos)
+    {
+        emit clearAllAnnotations();
         response = reply::json_reply("true");
         return;
   }

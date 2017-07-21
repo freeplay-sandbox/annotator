@@ -20,6 +20,7 @@ public:
                                 http::server::reply& response) override;
 
     Q_SIGNAL void annotationReceived(StreamType stream, AnnotationType annotation);
+    Q_SIGNAL void clearAllAnnotations();
     Q_SIGNAL void jumpBy(int secs);
     Q_SIGNAL void jumpTo(int secs);
     Q_SIGNAL void pause();

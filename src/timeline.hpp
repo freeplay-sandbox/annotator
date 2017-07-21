@@ -21,6 +21,7 @@ class Timeline : public QWidget {
 
     Q_SIGNAL void timeJump(ros::Time timepoint);
     Q_SIGNAL void togglePause();
+    Q_SIGNAL void pause();
 
     Q_SLOT void initialize(ros::Time begin, ros::Time end);
     Q_SLOT void setPlayhead(ros::Time time);
