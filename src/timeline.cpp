@@ -223,17 +223,19 @@ void Timeline::drawTimeline(QPainter *painter, int left, int right, int top, int
 
     double offset = major_increment - fmod(startTime_, major_increment);
 
-    for (double t = startTime_ + offset; t <= visibleDuration_ + startTime_; t += major_increment) {
+    for (double t = startTime_ - (major_increment - offset); t <= visibleDuration_ + startTime_; t += major_increment) {
 
         auto x = (t - startTime_) * pxPerSec_;
 
+        if(x >= left) {
             lines_light.push_back(QLine(x, top, x, bottom + 20));
             painter->drawText(QPoint(x + 2, bottom + 20), QString("%1:%2").arg(static_cast<int>(round(t)) / 60,2,10,QChar('0')).arg(static_cast<int>(round(t)) % 60,2,10,QChar('0')));
+        }
 
-            for (auto tm = t + minor_increment; tm < t + major_increment; tm += minor_increment) {
-                auto x = (tm - startTime_) * pxPerSec_;
-                lines_dark.push_back(QLine(x, top, x, bottom));
-            }
+        for (auto tm = t + minor_increment; tm < t + major_increment; tm += minor_increment) {
+            auto x = (tm - startTime_) * pxPerSec_;
+            if(x >= left) lines_dark.push_back(QLine(x, top, x, bottom));
+        }
 
     }
 
