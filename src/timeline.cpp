@@ -283,13 +283,13 @@ void Timeline::drawAnnotation(QPainter *painter,
         auto x2 = left + stop * pxPerSec_;
 
         painter->setPen(Annotation::Styles[a->type]);
-        painter->drawLine(x1, y, x2, y);
+        painter->drawLine(x1, y, x2-2, y);
 
         QPen capsPen(painter->pen());
         capsPen.setStyle(Qt::SolidLine);
         painter->setPen(capsPen);
         painter->drawLine(x1, y - radius/2, x1, y + radius/2);
-        painter->drawLine(x2, y - radius/2, x2, y + radius/2);
+        painter->drawLine(x2-2, y - radius/2, x2-2, y + radius/2);
 
         int annotationNameWidth = fm.width(QString::fromStdString(a->name()));
         if ((x2-x1) > annotationNameWidth + 5) {
