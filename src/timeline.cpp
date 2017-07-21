@@ -146,8 +146,6 @@ void Timeline::paintEvent(QPaintEvent *event)
     auto top = rect.top();
     auto bottom = rect.bottom() - 20;
 
-    yellowAnnotationOffset_ = top + 10;
-    purpleAnnotationOffset_ = top + 50;
 
     auto bagLength = (end_ - begin_).toSec();
 
@@ -182,6 +180,8 @@ void Timeline::placeFreeAnnotations() {
 
 void Timeline::drawTimeline(QPainter *painter, int left, int right, int top, int bottom) {
 
+    int yellowAnnotationOffset_ = top + 10;
+    int purpleAnnotationOffset_ = top + 60;
 
     int major_increment = 60; int minor_increment = 30;
     if (pxPerSec_ > 2) {major_increment = 30; minor_increment = 10;}
@@ -216,8 +216,8 @@ void Timeline::drawTimeline(QPainter *painter, int left, int right, int top, int
     painter->fillRect(QRectF(left,top,right,bottom), _color_background);
 
     // annotation zones
-    painter->fillRect(QRectF(left,purpleAnnotationOffset_ - 5,right,30), QColor("#4c2d64"));
-    painter->fillRect(QRectF(left,yellowAnnotationOffset_ - 5,right,30), QColor("#64592d"));
+    painter->fillRect(QRectF(left,purpleAnnotationOffset_ - 5,right,45), QColor("#4c2d64"));
+    painter->fillRect(QRectF(left,yellowAnnotationOffset_ - 5,right,45), QColor("#64592d"));
 
     // draw time
     painter->setPen(QPen(_color_light));
@@ -228,54 +228,13 @@ void Timeline::drawTimeline(QPainter *painter, int left, int right, int top, int
 
 
     // Drawing of annotations
-    int radius = 4;
+    QFont font = painter->font() ;
+    font.setPointSize(8);
+    painter->setFont(font);
 
-    for(auto a : purpleAnnotations) {
+    for(auto a : purpleAnnotations) drawAnnotation(painter, a, purpleAnnotationOffset_, left);
 
-        auto categoryOffset = 0;
-        if(a->category() == AnnotationCategory::SOCIAL_ENGAGEMENT) categoryOffset = 10;
-        else if(a->category() == AnnotationCategory::SOCIAL_ATTITUDE) categoryOffset = 20;
-
-        auto y = purpleAnnotationOffset_ + categoryOffset;
-
-        auto start = std::max(0., (a->start - begin_).toSec() - startTime_);
-        auto stop = std::min((a->stop - begin_).toSec() - startTime_, startTime_ + visibleDuration_);
-
-        auto x1 = left + start * pxPerSec_;
-        auto x2 = left + stop * pxPerSec_;
-
-        painter->setPen(Annotation::Styles[a->type]);
-        painter->setBrush(Annotation::Styles[a->type].brush());
-        painter->drawLine(x1, y - radius/2, x1, y + radius/2);
-        painter->drawLine(x1, y, x2, y);
-        painter->drawLine(x2, y - radius/2, x2, y + radius/2);
-        if ((x2-x1) > 40) {
-            painter->drawText(QPoint(x1 + 2, y - 5), QString::fromStdString(a->name()));
-        }
-    }
-
-    for(auto a : yellowAnnotations) {
-
-        auto categoryOffset = 0;
-        if(a->category() == AnnotationCategory::SOCIAL_ENGAGEMENT) categoryOffset = 10;
-        else if(a->category() == AnnotationCategory::SOCIAL_ATTITUDE) categoryOffset = 20;
-
-        auto y = yellowAnnotationOffset_ + categoryOffset;
-
-        auto start = std::max(0., (a->start - begin_).toSec() - startTime_);
-        auto stop = std::min((a->stop - begin_).toSec() - startTime_, startTime_ + visibleDuration_);
-        auto x1 = left + start * pxPerSec_;
-        auto x2 = left + stop * pxPerSec_;
-
-        painter->setPen(Annotation::Styles[a->type]);
-        painter->setBrush(Annotation::Styles[a->type].brush());
-        painter->drawLine(x1, y - radius/2, x1, y + radius/2);
-        painter->drawLine(x1, y, x2, y);
-        painter->drawLine(x2, y - radius/2, x2, y + radius/2);
-        if ((x2-x1) > 40) {
-            painter->drawText(QPoint(x1 + 2, y - 5), QString::fromStdString(a->name()));
-        }
-    }
+    for(auto a : yellowAnnotations) drawAnnotation(painter, a, yellowAnnotationOffset_, left);
     
     // playhead
     painter->setPen(QPen(_color_playhead, 2));
@@ -283,6 +242,42 @@ void Timeline::drawTimeline(QPainter *painter, int left, int right, int top, int
 
 
 }
+
+void Timeline::drawAnnotation(QPainter *painter,
+                              AnnotationPtr a,
+                              int offset,
+                              int left) {
+
+        int radius = 4;
+        QFontMetrics fm(painter->font());
+
+        auto categoryOffset = 5;
+        if(a->category() == AnnotationCategory::SOCIAL_ENGAGEMENT) categoryOffset = 20;
+        else if(a->category() == AnnotationCategory::SOCIAL_ATTITUDE) categoryOffset = 35;
+
+        auto y = offset + categoryOffset;
+
+        auto start = std::max(0., (a->start - begin_).toSec() - startTime_);
+        auto stop = std::min((a->stop - begin_).toSec() - startTime_, startTime_ + visibleDuration_);
+        auto x1 = left + start * pxPerSec_;
+        auto x2 = left + stop * pxPerSec_;
+
+        painter->setPen(Annotation::Styles[a->type]);
+        painter->drawLine(x1, y, x2, y);
+
+        QPen capsPen(painter->pen());
+        capsPen.setStyle(Qt::SolidLine);
+        painter->setPen(capsPen);
+        painter->drawLine(x1, y - radius/2, x1, y + radius/2);
+        painter->drawLine(x2, y - radius/2, x2, y + radius/2);
+
+        int annotationNameWidth = fm.width(QString::fromStdString(a->name()));
+        if ((x2-x1) > annotationNameWidth + 5) {
+            painter->drawText(QPoint(x1 + 2, y - 2), QString::fromStdString(a->name()));
+        }
+
+}
+
 
 void Timeline::keyPressEvent(QKeyEvent *event) {
 

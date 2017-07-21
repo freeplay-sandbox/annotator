@@ -52,8 +52,6 @@ protected:
 
     QBrush _brush_background;
 
-    int purpleAnnotationOffset_, yellowAnnotationOffset_;
-
     double elapsedTime_, visibleDuration_, startTime_, pxPerSec_;
 
     ros::Time pointToTimestamp(QPoint point);
@@ -69,6 +67,7 @@ protected:
 
     QTimer autosaveTimer;
     std::string annotationPath;
+    void drawAnnotation(QPainter *painter, AnnotationPtr a, int offset, int left);
 };
 
 #endif
