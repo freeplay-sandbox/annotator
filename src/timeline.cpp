@@ -143,6 +143,11 @@ void Timeline::saveToFile(const string& path)
 
     YAML::Emitter out;
 
+    std::time_t t = std::time(nullptr);
+    std::tm tm = *std::localtime(&t);
+    stringstream ss;
+    ss << "Annotations made by " << qgetenv("USER").toStdString() << " on the " << std::put_time(&tm, "%Y-%m-%d %H:%M:%S");
+    out << YAML::Comment(ss.str());
     out << YAML::BeginMap;
     out << YAML::Key << "purple" << YAML::Value << purpleAnnotations;
     out << YAML::Key << "yellow" << YAML::Value << yellowAnnotations;
