@@ -93,15 +93,21 @@ AnnotationPtr Annotations::getNextInCategory(AnnotationPtr ref) {
 
 void Annotations::add(Annotation annotation) {
 
+    annotation.stop += ros::Duration(0.001); // make sure our annotation has a non-null duration
+
     // interrupt current annotation, if any
     auto actives = getAnnotationsAt(annotation.start);
     for (auto a : actives) {
         if(a->category() == annotation.category()) {
+            if(a->stop > annotation.stop) { // need to split!
+                Annotation a2(*a);
+                a2.start = annotation.stop;
+                annotations.push_back(std::make_shared<Annotation>(a2));
+            }
             a->stop = annotation.start;
         }
     }
 
-    annotation.stop += ros::Duration(0.001); // make sure our annotation has a non-null duration
 
     annotations.push_back(std::make_shared<Annotation>(annotation));
 
