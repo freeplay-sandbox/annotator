@@ -176,6 +176,13 @@ int main(int argc, char *argv[])
         
     settings.setValue("recent", fileName);
     bagreader.loadBag(fileName.toStdString());
+    QFileInfo fi(fileName);
+    QFileInfo annotationPath(fi.path() + "/" + fi.completeBaseName() + ".annotations.yaml");
+    if (annotationPath.exists()) {
+        timeline->loadFromFile(annotationPath.filePath().toStdString());
+    }
+    timeline->setSavePath(annotationPath.filePath().toStdString());
+    aw.showAutosavePath(annotationPath.filePath());
 
     QMetaObject::invokeMethod(&bagreader, "start");
 

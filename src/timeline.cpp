@@ -85,6 +85,11 @@ void Timeline::newAnnotation(StreamType stream, AnnotationType annotationtype)
     }
 }
 
+void Timeline::setSavePath(const string &path)
+{
+    annotationPath = path;
+}
+
 void Timeline::loadFromFile(const string& path)
 {
     qDebug() << "Loading " << QString::fromStdString(path);
