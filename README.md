@@ -47,3 +47,12 @@ following interface:
 ![Screenshoot of the Web UI](doc/ui.png)
 
 Annotations are automatically saved (cf status bar to see where they are saved).
+
+Keyboard shortcuts
+------------------
+
+
+- Press `Del` to clear all annotations.
+- Press `Ctrl+S` to save the annotations to a different file.
+- Press `Ctrl+O` to load annotations.
+- Press `F11` to toggle fullscreen.

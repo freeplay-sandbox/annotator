@@ -166,8 +166,6 @@ int main(int argc, char *argv[])
     //aw.showFullScreen();
     aw.show();
 
-    //bagreader.loadBag("/home/slemaignan/freeplay_sandox/data/2017-06-12-143746652201/freeplay.bag");
-    //bagreader.loadBag("/home/skadge/freeplay_sandox/data/2017-05-18-145157833880/freeplay.bag");
     QSettings settings("PlymouthUniversity", "FreeplayDatasetAnnotator");
 
     QString recent = settings.value("recent").toString();

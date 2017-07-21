@@ -37,10 +37,11 @@ void AnnotatorWindow::keyPressEvent(QKeyEvent *event) {
 
     switch (event->key()) {
     ////// MISC DEBUG
-    case Qt::Key_Enter:
-    case Qt::Key_Return:
-        qDebug() << "Hi";
-        QWidget::keyPressEvent(event);
+    case Qt::Key_F11:
+        if (windowState() & Qt::WindowFullScreen)
+            setWindowState(Qt::WindowNoState);
+        else
+            setWindowState(Qt::WindowFullScreen);
         break;
 
         ////// NOT HANDLED -> pass forward
