@@ -82,7 +82,8 @@ class Annotations
 {
 
 public:
-    void updateActive(ros::Time time);
+
+    Annotations();
 
     friend YAML::Emitter& operator<< (YAML::Emitter& out, const Annotations& a);
 
@@ -96,10 +97,23 @@ public:
     const_iterator end() const {return annotations.end();}
     const_iterator cend() const {return annotations.cend();}
 
+
+    void updateActive(ros::Time time);
     void add(Annotation annotation);
     void clear() {annotations.clear();}
 
+    bool isLocked(AnnotationCategory category) const {return lockedCategories.at(category);}
+    void lock(AnnotationCategory category) {lockedCategories[category] = true;}
+    void unlock(AnnotationCategory category) {lockedCategories[category] = false;}
+    void lockAllCategories();
+    void unlockAllCategories();
+
+    ros::Time lastStopTime() const;
+
+
 private:
+
+    std::map<AnnotationCategory, bool> lockedCategories;
 
     std::vector<AnnotationPtr> getAnnotationsAt(ros::Time time);
     std::vector<AnnotationPtr> getAnnotationsAtApprox(ros::Time time);

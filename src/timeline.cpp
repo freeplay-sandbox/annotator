@@ -61,6 +61,21 @@ void Timeline::initialize(ros::Time begin, ros::Time end)
 
 void Timeline::setPlayhead(ros::Time time)
 {
+    // if we perform a 'large' jump in time, lock the annotations
+    // this ensure we do not unwillingly modify existing annotations
+    // when seeking through the timeline
+    if(  (   time > current_
+          && time - current_ > ros::Duration(.5))
+       ||(    time < current_
+          && current_ - time > ros::Duration(.5)))
+    {
+        purpleAnnotations.lockAllCategories();
+        yellowAnnotations.lockAllCategories();
+    }
+
+    // If we jump at the end of the annotation, unlock annotations, so that we can automatically continue to annotate
+    if (time > purpleAnnotations.lastStopTime()) purpleAnnotations.unlockAllCategories();
+    if (time > yellowAnnotations.lastStopTime()) yellowAnnotations.unlockAllCategories();
 
    purpleAnnotations.updateActive(time);
    yellowAnnotations.updateActive(time);
@@ -130,6 +145,10 @@ void Timeline::loadFromFile(const string& path)
             yellowAnnotations.add({type, ros::Time(ts[0]), ros::Time(ts[1])});
         }
     }
+
+    purpleAnnotations.lockAllCategories();
+    yellowAnnotations.lockAllCategories();
+
     update();
 }
 

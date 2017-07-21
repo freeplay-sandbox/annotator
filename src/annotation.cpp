@@ -32,6 +32,14 @@ AnnotationType annotationFromName(const std::string& name) {
 }
 
 
+Annotations::Annotations() :
+    lockedCategories({{AnnotationCategory::TASK_ENGAGEMENT, true},
+                       {AnnotationCategory::SOCIAL_ENGAGEMENT, true},
+                       {AnnotationCategory::SOCIAL_ATTITUDE, true}})
+{
+
+}
+
 void Annotations::updateActive(ros::Time time)
 {
 
@@ -42,6 +50,7 @@ void Annotations::updateActive(ros::Time time)
                       annotations.end());
 
     for (auto category : AnnotationCategories) {
+        if(isLocked(category)) continue;
 
         auto active = getClosestStopTime(time, category);
         if(active && active->stop < time) active->stop = time;
@@ -93,6 +102,8 @@ AnnotationPtr Annotations::getNextInCategory(AnnotationPtr ref) {
 
 void Annotations::add(Annotation annotation) {
 
+    unlock(annotation.category());
+
     annotation.stop += ros::Duration(0.001); // make sure our annotation has a non-null duration
 
     // interrupt current annotation, if any
@@ -112,6 +123,30 @@ void Annotations::add(Annotation annotation) {
     annotations.push_back(std::make_shared<Annotation>(annotation));
 
     std::sort(annotations.begin(), annotations.end(), [](const AnnotationPtr a, const AnnotationPtr b) { return a->start < b->start; });
+}
+
+void Annotations::lockAllCategories()
+{
+   for (auto c : AnnotationCategories) lockedCategories[c] = true;
+}
+
+void Annotations::unlockAllCategories()
+{
+    for (auto c : AnnotationCategories) lockedCategories[c] = false;
+}
+
+/**
+ * @brief Returns the end time of the last annotation
+ * @return
+ */
+ros::Time Annotations::lastStopTime() const
+{
+    auto t = ros::TIME_MIN;
+
+    for (auto a : annotations) {
+        if (a->stop > t) t = a->stop;
+    }
+    return t;
 }
 
 /**
