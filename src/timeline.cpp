@@ -62,8 +62,8 @@ void Timeline::initialize(ros::Time begin, ros::Time end)
 void Timeline::setPlayhead(ros::Time time)
 {
 
-   purpleAnnotations.updateCurrentAnnotationEnd(time);
-   yellowAnnotations.updateCurrentAnnotationEnd(time);
+   purpleAnnotations.updateActive(time);
+   yellowAnnotations.updateActive(time);
 
    current_ = time;
    update();

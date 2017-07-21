@@ -32,73 +32,113 @@ AnnotationType annotationFromName(const std::string& name) {
 }
 
 
-void Annotations::updateCurrentAnnotationEnd(ros::Time time)
+void Annotations::updateActive(ros::Time time)
 {
-    AnnotationPtr current, next = nullptr;
+    for (auto category : AnnotationCategories) {
 
-    current = getAnnotationAtApprox(time);
+        auto active = getClosestStopTime(time, category);
+        if(active && active->stop < time) active->stop = time;
 
-    if(!current) return;
-
-    if (current != annotations.back()) // we are not the last annotation
-    {
-        auto it = std::find(annotations.begin(), annotations.end(), current);
-        next = *(it + 1);
-        qDebug() << "Got next one";
+        auto next = getNextInCategory(active);
+        if(next && next->start < time) next->start = time;
     }
+}
 
-    if(current && current->stop < time) current->stop = time;
-    if(next && next->start < time) next->start = time;
+/**
+ * @brief Returns the annotation whose stop time is the closest to the current time (within the MAX_TIME_TO_MERGE threshold)
+ * @param time
+ * @param category: the returned annotation must belong to this category
+ * @return
+ */
+AnnotationPtr Annotations::getClosestStopTime(ros::Time time, AnnotationCategory category) {
+
+    AnnotationPtr closest = nullptr;
+
+    for (auto a : annotations) {
+        if(   a->category() == category
+           && a->stop < time
+           && a->stop > time - MAX_TIME_TO_MERGE) {
+            if (   !closest
+                || (time - a->stop) < (time - closest->stop))
+            {
+                closest = a;
+            }
+        }
+    }
+    return closest;
+}
+
+/**
+ * @brief returns the annotation following 'ref' in the timeline, *belonging to the same category* (or nullptr is none exist)
+ */
+AnnotationPtr Annotations::getNextInCategory(AnnotationPtr ref) {
+
+    bool foundmyself = false;
+
+    // note that 'annotations' is always sorted by start time!
+    for (auto a : annotations) {
+        if(foundmyself && a->category() == ref->category()) return a;
+        if(a == ref) foundmyself = true;
+    }
+    return nullptr;
 }
 
 
 void Annotations::add(Annotation annotation) {
+
+    // interrupt current annotation, if any
+    auto actives = getAnnotationsAt(annotation.start);
+    for (auto a : actives) {
+        if(a->category() == annotation.category()) {
+            a->stop = annotation.start - ros::Duration(0.001);
+        }
+    }
+
     annotations.push_back(std::make_shared<Annotation>(annotation));
 
     std::sort(annotations.begin(), annotations.end(), [](const AnnotationPtr a, const AnnotationPtr b) { return a->start < b->start; });
 }
 
 /**
- * @brief Returns a pointer to the annotation at given time, or nullptr if none
+ * @brief Returns the list of annotations at given time
  * @param time
  * @return
  */
-AnnotationPtr Annotations::getAnnotationAt(ros::Time time)
+vector<AnnotationPtr> Annotations::getAnnotationsAt(ros::Time time)
 {
-   if (annotations.empty()) return nullptr;
+   vector<AnnotationPtr> res;
+
+   if (annotations.empty()) return res;
 
    for(size_t i = 0; i < annotations.size(); i++) {
 
-       if (   i == annotations.size() - 1
-           && time < annotations[i]->stop
-           && time > annotations[i]->start)
+       if (   time <= annotations[i]->stop
+           && time >= annotations[i]->start)
        {
-           return annotations[i];
+           res.push_back(annotations[i]);
        }
    }
 
-   return nullptr;
+   return res;
 }
 
-AnnotationPtr Annotations::getAnnotationAtApprox(ros::Time time)
+
+
+vector<AnnotationPtr> Annotations::getAnnotationsAtApprox(ros::Time time)
 {
 
-    auto annotation = getAnnotationAt(time);
+   vector<AnnotationPtr> res = getAnnotationsAt(time);
 
-    if(annotation) return annotation;
-
-    //else...
    for(size_t i = 0; i < annotations.size(); i++) {
 
-       if (   i == annotations.size() - 1
-           && time < (annotations[i]->stop + MAX_TIME_TO_MERGE)
+       if (   time < (annotations[i]->stop + MAX_TIME_TO_MERGE)
            && time > (annotations[i]->start - MAX_TIME_TO_MERGE))
        {
-           return annotations[i];
+           res.push_back(annotations[i]);
        }
    }
 
-   return nullptr;
+   return res;
 }
 
 YAML::Emitter& operator<< (YAML::Emitter& out, const Annotations& a)

@@ -3,6 +3,7 @@
 
 #include <map>
 #include <vector>
+#include <array>
 #include <tuple>
 #include <memory>
 
@@ -19,6 +20,10 @@ enum class AnnotationCategory {
                     SOCIAL_ENGAGEMENT,
                     SOCIAL_ATTITUDE
             };
+
+const std::array<AnnotationCategory,3> AnnotationCategories {AnnotationCategory::TASK_ENGAGEMENT,
+                                                            AnnotationCategory::SOCIAL_ENGAGEMENT,
+                                                            AnnotationCategory::SOCIAL_ATTITUDE};
 
 enum class AnnotationType {OTHER=0,
                            GOALORIENTED,
@@ -77,7 +82,7 @@ class Annotations
 {
 
 public:
-    void updateCurrentAnnotationEnd(ros::Time time);
+    void updateActive(ros::Time time);
 
     friend YAML::Emitter& operator<< (YAML::Emitter& out, const Annotations& a);
 
@@ -96,11 +101,13 @@ public:
 
 private:
 
-    AnnotationPtr getAnnotationAt(ros::Time time);
-    AnnotationPtr getAnnotationAtApprox(ros::Time time);
+    std::vector<AnnotationPtr> getAnnotationsAt(ros::Time time);
+    std::vector<AnnotationPtr> getAnnotationsAtApprox(ros::Time time);
 
     std::vector<AnnotationPtr> annotations;
 
+    AnnotationPtr getNextInCategory(AnnotationPtr ref);
+    AnnotationPtr getClosestStopTime(ros::Time time, AnnotationCategory category);
 };
 
 
