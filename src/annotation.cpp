@@ -34,6 +34,13 @@ AnnotationType annotationFromName(const std::string& name) {
 
 void Annotations::updateActive(ros::Time time)
 {
+
+    // clean up annotations: all annotations with a null (or negative) duration are erased
+    annotations.erase(std::remove_if(annotations.begin(),
+                                     annotations.end(),
+                                     [](AnnotationPtr a){return a->start >= a->stop;}),
+                      annotations.end());
+
     for (auto category : AnnotationCategories) {
 
         auto active = getClosestStopTime(time, category);
@@ -90,9 +97,11 @@ void Annotations::add(Annotation annotation) {
     auto actives = getAnnotationsAt(annotation.start);
     for (auto a : actives) {
         if(a->category() == annotation.category()) {
-            a->stop = annotation.start - ros::Duration(0.001);
+            a->stop = annotation.start;
         }
     }
+
+    annotation.stop += ros::Duration(0.001); // make sure our annotation has a non-null duration
 
     annotations.push_back(std::make_shared<Annotation>(annotation));
 
