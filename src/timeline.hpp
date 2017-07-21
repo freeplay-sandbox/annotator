@@ -26,6 +26,7 @@ class Timeline : public QWidget {
     Q_SLOT void setPlayhead(ros::Time time);
 
     Q_SLOT void newAnnotation(StreamType stream, AnnotationType annotation);
+    Q_SLOT void clearAllAnnotations();
 
     Q_SLOT void setSavePath(const std::string &path);
     Q_SLOT void saveToFile(const std::string &path);

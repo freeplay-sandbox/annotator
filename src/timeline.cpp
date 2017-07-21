@@ -7,6 +7,7 @@
 #include <QGraphicsTextItem>
 #include <QKeyEvent>
 #include <QGraphicsView>
+#include <QMessageBox>
 #include <QDebug>
 #include <algorithm>
 #include <iostream>
@@ -83,6 +84,20 @@ void Timeline::newAnnotation(StreamType stream, AnnotationType annotationtype)
     default:
         break;
     }
+}
+
+void Timeline::clearAllAnnotations()
+{
+    emit togglePause();
+    auto ret = QMessageBox::warning(this, "Clear all annotations",
+                                   "Are you sure you want to clear all annotations?",
+                                   QMessageBox::Yes | QMessageBox::No);
+
+    if(ret == QMessageBox::Yes) {
+        purpleAnnotations.clear();
+        yellowAnnotations.clear();
+    }
+    emit timeJump(begin_);
 }
 
 void Timeline::setSavePath(const string &path)
@@ -366,6 +381,10 @@ void Timeline::keyPressEvent(QKeyEvent *event) {
         break;
      case Qt::Key_L:
         yellowAnnotations.add({AnnotationType::AIMLESS, current_, current_});
+        break;
+     case Qt::Key_X:
+     case Qt::Key_Delete:
+        clearAllAnnotations();
         break;
 
         ////// NOT HANDLED -> pass forward
