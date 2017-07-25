@@ -49,6 +49,8 @@ following interface:
 Annotations are automatically saved next to the bag file as `<bag
 file>.annotations.yaml` (the status bar indicates the full path to this file).
 
+The coding scheme is [documented here](https://freeplay-sandbox.github.io/coding-scheme).
+
 ### Keyboard shortcuts
 
 
@@ -57,44 +59,6 @@ file>.annotations.yaml` (the status bar indicates the full path to this file).
 - Press `Ctrl+O` to load annotations.
 - Press `F11` to toggle fullscreen.
 
-Coding scheme
--------------
 
-![Coding scheme](doc/coding-scheme.png)
-
-We detail hereafter the coding scheme.
-
-### Task Engagement
-
-| Construct             | Details                                                                |
-|-----------------------|------------------------------------------------------------------------|
-| goal-oriented         | purposeful play, implicit action planning, structured play             |
-| aimless               | unstructured play, silly play                                          |
-| adult seeking         | ask question, seek approval                                            |
-| no play               | does not perform any obvious activity                                  |
-
-Note that *structured* play might or might no be be on topic: a structured
-activity unrelated to the offered touchscreen/drawing activity should still be
-labelled as *goal-oriented*.
-
-### Social Engagement
-
-| Construct             | Details                                                                       |
-|-----------------------|-------------------------------------------------------------------------------|
-| solitary play         |                                                                               |
-| onlooker              | child looking at the other for a prolongated period of time, without engaging |
-| parallel play         |                                                                               |
-| associative play      |                                                                               |
-| cooperative play      |                                                                               |
-
-### Social attitude
-
-| Construct             | Details                                                                   |
-|-----------------------|---------------------------------------------------------------------------|
-| pro-social            |                                                                           |
-| adversarial           |                                                                           |
-| assertive             |                                                                           |
-| frustrated            |                                                                           |
-| passive               |                                                                           | 
 
 
