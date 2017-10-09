@@ -146,14 +146,14 @@ int main(int argc, char *argv[])
     QObject::connect(timeline, &Timeline::togglePause, &bagreader, &BagReader::togglePause);
     QObject::connect(timeline, &Timeline::pause, &bagreader, &BagReader::pause);
 
-    auto jumpBack10Btn = aw.findChild<QPushButton*>("jumpBack10Btn");
-    QObject::connect(jumpBack10Btn, &QPushButton::clicked, [&](){bagreader.jumpBy(-10);});
-    auto jumpBack1Btn = aw.findChild<QPushButton*>("jumpBack1Btn");
-    QObject::connect(jumpBack1Btn, &QPushButton::clicked, [&](){bagreader.jumpBy(-1);});
-    auto jumpFwd1Btn = aw.findChild<QPushButton*>("jumpFwd1Btn");
-    QObject::connect(jumpFwd1Btn, &QPushButton::clicked, [&](){bagreader.jumpBy(1);});
-    auto jumpFwd10Btn = aw.findChild<QPushButton*>("jumpFwd10Btn");
-    QObject::connect(jumpFwd10Btn, &QPushButton::clicked, [&](){bagreader.jumpBy(10);});
+    auto jumpBackLongBtn = aw.findChild<QPushButton*>("jumpBackLongBtn");
+    QObject::connect(jumpBackLongBtn, &QPushButton::clicked, [&](){bagreader.jumpBy(-10);});
+    auto jumpBackShortBtn = aw.findChild<QPushButton*>("jumpBackShortBtn");
+    QObject::connect(jumpBackShortBtn, &QPushButton::clicked, [&](){bagreader.jumpBy(-5);});
+    auto jumpFwdShortBtn = aw.findChild<QPushButton*>("jumpFwdShortBtn");
+    QObject::connect(jumpFwdShortBtn, &QPushButton::clicked, [&](){bagreader.jumpBy(5);});
+    auto jumpFwdLongBtn = aw.findChild<QPushButton*>("jumpFwdLongBtn");
+    QObject::connect(jumpFwdLongBtn, &QPushButton::clicked, [&](){bagreader.jumpBy(10);});
 
     auto jumpStartBtn = aw.findChild<QPushButton*>("jumpStartBtn");
     QObject::connect(jumpStartBtn, &QPushButton::clicked, [&](){bagreader.jumpTo(0);});
