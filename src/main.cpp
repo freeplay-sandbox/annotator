@@ -168,6 +168,15 @@ int main(int argc, char *argv[])
 
     QSettings settings("PlymouthUniversity", "FreeplayDatasetAnnotator");
 
+    QString lastCoder = settings.value("last_coder_name").toString();
+    bool ok;
+    QString name = QInputDialog::getText(nullptr, "Coder name",
+                                             "Your name:", QLineEdit::Normal,
+                                             lastCoder, &ok);
+    if (!ok || name.isEmpty()) exit(1);
+
+    settings.setValue("last_coder_name", name);
+
     QString recent = settings.value("recent").toString();
     QString fileName = QFileDialog::getOpenFileName(nullptr, "Load bag file",
                                                     recent,
@@ -177,7 +186,7 @@ int main(int argc, char *argv[])
     settings.setValue("recent", fileName);
     bagreader.loadBag(fileName.toStdString());
     QFileInfo fi(fileName);
-    QFileInfo annotationPath(fi.path() + "/" + fi.completeBaseName() + ".annotations.yaml");
+    QFileInfo annotationPath(fi.path() + "/" + fi.completeBaseName() + ".annotations." + name + ".yaml");
     if (annotationPath.exists()) {
         timeline->loadFromFile(annotationPath.filePath().toStdString());
     }
