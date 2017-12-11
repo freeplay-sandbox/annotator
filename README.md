@@ -38,7 +38,8 @@ Usage
 -----
 
 **From the directory containing the source**, execute
-`build/freeplay-sandbox-annotator`. Select the bag file you want to annotate.
+`build/freeplay-sandbox-annotator`. Type in your name, and then select the bag
+file you want to annotate.
 
 To create annotations, open the page `http://<ip of the computer running the
 annotator>:8080` from another device (like a tablet). You should see the
@@ -47,7 +48,7 @@ following interface:
 ![Screenshoot of the Web UI](doc/ui.png)
 
 Annotations are automatically saved next to the bag file as `<bag
-file>.annotations.yaml` (the status bar indicates the full path to this file).
+file>.annotations.<name>.yaml` (the status bar indicates the full path to this file).
 
 The coding scheme is [documented here](https://freeplay-sandbox.github.io/coding-scheme).
 

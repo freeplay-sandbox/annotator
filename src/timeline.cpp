@@ -396,6 +396,7 @@ void Timeline::keyPressEvent(QKeyEvent *event) {
                                                             "",
                                                             tr("Annotations (*.yaml)"));
             if(!fileName.isEmpty()) {
+                annotationPath = fileName.toStdString();
                 loadFromFile(annotationPath);
             }
         }
