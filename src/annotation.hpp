@@ -41,7 +41,10 @@ enum class AnnotationType {OTHER=0,
                            ADVERSARIAL,
                            ASSERTIVE,
                            FRUSTRATED,
-                           PASSIVE};
+                           PASSIVE,
+
+                           MISSING,
+                           CONFLICT};
 
 const std::map<AnnotationType, std::pair<std::string, AnnotationCategory>> AnnotationNames {
                 {AnnotationType::GOALORIENTED, {"goaloriented", AnnotationCategory::TASK_ENGAGEMENT}},
@@ -125,6 +128,12 @@ private:
     AnnotationPtr getNextInCategory(AnnotationPtr ref);
     AnnotationPtr getClosestStopTime(ros::Time time, AnnotationCategory category);
 };
+
+/**
+* Generates the 'diff' of 2 sets of annotations: a new annotations set representing only the differences between the 2
+* provided annotations sets.
+*/
+Annotations diff(const Annotations& a1, const Annotations& a2);
 
 
 #endif // ANNOTATION_H

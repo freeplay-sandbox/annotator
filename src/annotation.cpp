@@ -1,5 +1,6 @@
 
 #include <QDebug>
+#include <algorithm>
 
 #include "annotation.hpp"
 
@@ -12,16 +13,20 @@ std::map<AnnotationType, QPen> Annotation::Styles = {
             {AnnotationType::AIMLESS, QPen(QBrush(QColor("#ff6f00")), 2, Qt::SolidLine)},
             {AnnotationType::ADULTSEEKING, QPen(QBrush(QColor("#E57373")), 2, Qt::DashLine)},
             {AnnotationType::NOPLAY, QPen(QBrush(QColor("#E3F2FD")), 2, Qt::DotLine)},
+
             {AnnotationType::SOLITARY, QPen(QBrush(QColor("#9fa8da")), 2, Qt::SolidLine)},
             {AnnotationType::ONLOOKER, QPen(QBrush(QColor("#00bcd4")), 2, Qt::SolidLine)},
             {AnnotationType::PARALLEL, QPen(QBrush(QColor("#e6ee9c")), 2, Qt::SolidLine)},
             {AnnotationType::ASSOCIATIVE, QPen(QBrush(QColor("#ffeb3b")), 2, Qt::SolidLine)},
             {AnnotationType::COOPERATIVE, QPen(QBrush(QColor("#ffc107")), 2, Qt::SolidLine)},
+
             {AnnotationType::PROSOCIAL, QPen(QBrush(QColor("#4CAF50")), 2, Qt::SolidLine)},
             {AnnotationType::ADVERSARIAL, QPen(QBrush(QColor("#ff6f00")), 2, Qt::SolidLine)},
             {AnnotationType::ASSERTIVE, QPen(QBrush(QColor("#26a69a")), 2, Qt::SolidLine)},
             {AnnotationType::FRUSTRATED, QPen(QBrush(QColor("#9c27b0")), 2, Qt::SolidLine)},
-            {AnnotationType::PASSIVE, QPen(QBrush(QColor("#E3F2FD")), 2, Qt::DotLine)}
+            {AnnotationType::PASSIVE, QPen(QBrush(QColor("#E3F2FD")), 2, Qt::DotLine)},
+
+            {AnnotationType::CONFLICT, QPen(QBrush(QColor("#FF0000")), 3, Qt::SolidLine)}
         };
 
 AnnotationType annotationFromName(const std::string& name) {
@@ -222,4 +227,60 @@ YAML::Emitter& operator<< (YAML::Emitter& out, const Annotations& a)
     }
     out << YAML::EndSeq;
     return out;
+}
+
+Annotations diff(const Annotations &a1, const Annotations &a2)
+{
+
+    auto current_a1 = a1.cbegin();
+    auto current_a2 = a2.cbegin();
+    auto current_time = min((*current_a1)->start, (*current_a2)->start);
+
+
+    // first, calculate all the 'time splits', ie the time intervals resulting from the
+    // intersection of the 2 annotations streams.
+    vector<ros::Time> time_splits {current_time};
+    while(true) {
+        vector<ros::Time> next_time_candidates;
+
+        if(current_a1 != a1.cend()) {
+            if(current_time < (*current_a1)->start)
+                next_time_candidates.push_back((*current_a1)->start);
+            if(current_time < (*current_a1)->stop)
+                next_time_candidates.push_back((*current_a1)->stop);
+        }
+
+        if(current_a2 != a2.cend()) {
+            if(current_time < (*current_a2)->start)
+                next_time_candidates.push_back((*current_a2)->start);
+            if(current_time < (*current_a2)->stop)
+                next_time_candidates.push_back((*current_a2)->stop);
+        }
+
+        auto next_time_split = *std::min_element(next_time_candidates.begin(), next_time_candidates.end());
+
+        time_splits.push_back(next_time_split);
+        current_time = next_time_split;
+
+        if(next_time_split == (*current_a1)->stop) current_a1++;
+        if(next_time_split == (*current_a2)->stop) current_a2++;
+
+        if(current_a1 == a1.cend() && current_a2 == a2.cend()) break;
+    }
+
+    // second, for each time splits, check whether the two original annotation streams
+    // match. If they do not, set the resulting interval as 'CONFLICT'
+    Annotations diffs;
+    for (size_t t=0; t < time_splits.size() - 1; t++) {
+        auto type1 = a1.getAnnotationTypeAt(time_splits[t]);
+        auto type2 = a2.getAnnotationTypeAt(time_splits[t]);
+
+        if(type1 == type2)
+            diffs.add({type1, time_splits[t], time_splits[t+1]});
+        else
+            diffs.add({AnnotationType::CONFLICT, time_splits[t], time_splits[t+1]});
+    }
+
+    return diffs;
+
 }
