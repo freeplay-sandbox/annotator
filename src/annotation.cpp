@@ -150,7 +150,7 @@ ros::Time Annotations::lastStopTime() const
 }
 
 /**
- * @brief Returns the list of annotations at given time
+ * @brief Returns the list of annotations at given time. Can be more than one when the stop time and start time of 2 annotations match
  * @param time
  * @return
  */
@@ -172,6 +172,26 @@ vector<AnnotationPtr> Annotations::getAnnotationsAt(ros::Time time)
    return res;
 }
 
+/**
+ * Returns the type of the annotation at given time.
+ * If no annotation exist at given time, returns MISSING.
+ * If two annotations exist at given time (in case of identical start and stop time), return the type of the
+ * annotation about to start.
+ */
+AnnotationType Annotations::getAnnotationTypeAt(ros::Time time) const
+{
+   if (annotations.empty()) return AnnotationType::MISSING;
+
+   for(size_t i = 0; i < annotations.size(); i++) {
+
+       if (   time < annotations[i]->stop
+           && time >= annotations[i]->start)
+       {
+           return annotations[i]->type;
+       }
+   }
+
+}
 
 
 vector<AnnotationPtr> Annotations::getAnnotationsAtApprox(ros::Time time)

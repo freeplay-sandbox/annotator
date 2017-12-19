@@ -284,9 +284,9 @@ void Timeline::drawTimeline(QPainter *painter, int left, int right, int top, int
     font.setPointSize(8);
     painter->setFont(font);
 
-    for(auto a : purpleAnnotations) drawAnnotation(painter, a, purpleAnnotationOffset_, left);
+    for(const auto a : purpleAnnotations) drawAnnotation(painter, a, purpleAnnotationOffset_, left);
 
-    for(auto a : yellowAnnotations) drawAnnotation(painter, a, yellowAnnotationOffset_, left);
+    for(const auto a : yellowAnnotations) drawAnnotation(painter, a, yellowAnnotationOffset_, left);
     
     // playhead
     painter->setPen(QPen(_color_playhead, 2));
@@ -296,7 +296,7 @@ void Timeline::drawTimeline(QPainter *painter, int left, int right, int top, int
 }
 
 void Timeline::drawAnnotation(QPainter *painter,
-                              AnnotationPtr a,
+                              AnnotationConstPtr a,
                               int offset,
                               int left) {
 

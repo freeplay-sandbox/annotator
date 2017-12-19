@@ -77,6 +77,7 @@ struct Annotation
 };
 
 typedef typename std::shared_ptr<Annotation> AnnotationPtr;
+typedef typename std::shared_ptr<const Annotation> AnnotationConstPtr;
 
 class Annotations
 {
@@ -110,6 +111,7 @@ public:
 
     ros::Time lastStopTime() const;
 
+    AnnotationType getAnnotationTypeAt(ros::Time time) const;
 
 private:
 

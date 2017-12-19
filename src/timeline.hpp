@@ -72,7 +72,7 @@ protected:
 
     QTimer autosaveTimer;
     std::string annotationPath;
-    void drawAnnotation(QPainter *painter, AnnotationPtr a, int offset, int left);
+    void drawAnnotation(QPainter *painter, AnnotationConstPtr a, int offset, int left);
 };
 
 #endif
