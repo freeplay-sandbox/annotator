@@ -33,6 +33,7 @@ class Timeline : public QWidget {
     Q_SLOT void saveToFile(const std::string &path);
 
     Q_SLOT void loadFromFile(const std::string &path);
+    Q_SLOT void mergeAnnotations(const std::string &path1, const std::string &path2);
 
     void resetAnnotations();
 
@@ -61,8 +62,16 @@ protected:
 
     ros::Time pointToTimestamp(QPoint point);
 
-    Annotations yellowAnnotations;
     Annotations purpleAnnotations;
+    Annotations yellowAnnotations;
+
+    // in merge mode, we have a second set of annotations + a diff
+    bool mergeMode;
+    Annotations purpleAnnotations2;
+    Annotations yellowAnnotations2;
+    Annotations purpleDiff;
+    Annotations yellowDiff;
+    //////////////////////////////////////////////////////////////
 
     Annotations yamlToAnnotations(const YAML::Node node);
 

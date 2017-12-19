@@ -29,7 +29,8 @@ Timeline::Timeline(QWidget *parent):
           _color_playhead(QColor("#FF2F00")),
           _color_light(QColor("#7F7F7FAA")),
           _color_bg_text(QColor("#a1a1a1")),
-          _brush_background(_color_background)
+          _brush_background(_color_background),
+          mergeMode(false)
 {
     connect(&autosaveTimer, &QTimer::timeout, [&](){saveToFile("");});
     autosaveTimer.start(1000);
@@ -155,6 +156,27 @@ void Timeline::loadFromFile(const string& path)
     purpleAnnotations.lockAllCategories();
     yellowAnnotations.lockAllCategories();
 
+    mergeMode = false;
+    update();
+}
+
+void Timeline::mergeAnnotations(const string &path1, const string &path2)
+{
+    qDebug() << "Loading " << QString::fromStdString(path1) << " and " << QString::fromStdString(path2) << " for merging";
+
+    emit togglePause();
+
+    YAML::Node node1 = YAML::LoadFile(path1);
+    purpleAnnotations = yamlToAnnotations(node1["purple"]);
+    yellowAnnotations = yamlToAnnotations(node1["yellow"]);
+    YAML::Node node2 = YAML::LoadFile(path2);
+    purpleAnnotations2 = yamlToAnnotations(node2["purple"]);
+    yellowAnnotations2 = yamlToAnnotations(node2["yellow"]);
+
+    purpleDiff = diff(purpleAnnotations, purpleAnnotations2);
+    yellowDiff = diff(yellowAnnotations, yellowAnnotations2);
+
+    mergeMode = true;
     update();
 }
 
@@ -284,9 +306,16 @@ void Timeline::drawTimeline(QPainter *painter, int left, int right, int top, int
     font.setPointSize(8);
     painter->setFont(font);
 
-    for(const auto a : purpleAnnotations) drawAnnotation(painter, a, purpleAnnotationOffset_, left);
+    if (!mergeMode) {
+        for(const auto a : purpleAnnotations) drawAnnotation(painter, a, purpleAnnotationOffset_, left);
+        for(const auto a : yellowAnnotations) drawAnnotation(painter, a, yellowAnnotationOffset_, left);
+    }
+    else {
+        for(const auto a : purpleAnnotations) drawAnnotation(painter, a, purpleAnnotationOffset_, left);
+        for(const auto a : purpleAnnotations2) drawAnnotation(painter, a, purpleAnnotationOffset_ + 5, left);
+        for(const auto a : purpleDiff) drawAnnotation(painter, a, purpleAnnotationOffset_ + 10, left);
 
-    for(const auto a : yellowAnnotations) drawAnnotation(painter, a, yellowAnnotationOffset_, left);
+    }
     
     // playhead
     painter->setPen(QPen(_color_playhead, 2));
@@ -299,6 +328,10 @@ void Timeline::drawAnnotation(QPainter *painter,
                               AnnotationConstPtr a,
                               int offset,
                               int left) {
+
+        if(a->type == AnnotationType::MISSING) return;
+
+        if(mergeMode && a->category() != AnnotationCategory::TASK_ENGAGEMENT) return;
 
         int radius = 4;
         QFontMetrics fm(painter->font());
@@ -392,12 +425,16 @@ void Timeline::keyPressEvent(QKeyEvent *event) {
         if(QApplication::keyboardModifiers() && Qt::ControlModifier) // ctrl+o
         {
             emit pause();
-            QString fileName = QFileDialog::getOpenFileName(this, tr("Load annotations"),
+            QStringList fileNames = QFileDialog::getOpenFileNames(this, tr("Load annotations (select 2 for merge mode)"),
                                                             "",
                                                             tr("Annotations (*.yaml)"));
-            if(!fileName.isEmpty()) {
-                annotationPath = fileName.toStdString();
+            if(fileNames.size() == 1) {
+                annotationPath = fileNames[0].toStdString();
                 loadFromFile(annotationPath);
+            }
+            else if(fileNames.size() == 2) {
+                mergeAnnotations(fileNames[0].toStdString(), fileNames[1].toStdString());
+
             }
         }
         else {
