@@ -16,10 +16,10 @@
 enum class StreamType {PURPLE, YELLOW, GLOBAL};
 
 enum class AnnotationCategory {
+                    OTHER=0,
                     TASK_ENGAGEMENT,
                     SOCIAL_ENGAGEMENT,
-                    SOCIAL_ATTITUDE,
-                    OTHER
+                    SOCIAL_ATTITUDE
             };
 
 const std::array<AnnotationCategory,3> AnnotationCategories {AnnotationCategory::TASK_ENGAGEMENT,
@@ -27,46 +27,51 @@ const std::array<AnnotationCategory,3> AnnotationCategories {AnnotationCategory:
                                                             AnnotationCategory::SOCIAL_ATTITUDE};
 
 enum class AnnotationType {OTHER=0,
+
                            GOALORIENTED,
                            AIMLESS,
                            ADULTSEEKING,
                            NOPLAY,
+                           OTHER_TASK_ENGAGEMENT,
 
                            SOLITARY,
                            ONLOOKER,
                            PARALLEL,
                            ASSOCIATIVE,
                            COOPERATIVE,
+                           OTHER_SOCIAL_ENGAGEMENT,
 
                            PROSOCIAL,
                            ADVERSARIAL,
                            ASSERTIVE,
                            FRUSTRATED,
                            PASSIVE,
+                           OTHER_SOCIAL_ATTITUDE,
 
-                           MISSING,
-                           CONFLICT};
+                           MISSING};
 
 const std::map<AnnotationType, std::pair<std::string, AnnotationCategory>> AnnotationNames {
+                {AnnotationType::OTHER, {"?", AnnotationCategory::OTHER}},
+
                 {AnnotationType::GOALORIENTED, {"goaloriented", AnnotationCategory::TASK_ENGAGEMENT}},
                 {AnnotationType::AIMLESS, {"aimless", AnnotationCategory::TASK_ENGAGEMENT}},
                 {AnnotationType::ADULTSEEKING, {"adultseeking", AnnotationCategory::TASK_ENGAGEMENT}},
                 {AnnotationType::NOPLAY, {"noplay", AnnotationCategory::TASK_ENGAGEMENT}},
+                {AnnotationType::OTHER_TASK_ENGAGEMENT, {"?", AnnotationCategory::TASK_ENGAGEMENT}},
 
                 {AnnotationType::SOLITARY, {"solitary", AnnotationCategory::SOCIAL_ENGAGEMENT}},
                 {AnnotationType::ONLOOKER, {"onlooker", AnnotationCategory::SOCIAL_ENGAGEMENT}},
                 {AnnotationType::PARALLEL, {"parallel", AnnotationCategory::SOCIAL_ENGAGEMENT}},
                 {AnnotationType::ASSOCIATIVE, {"associative", AnnotationCategory::SOCIAL_ENGAGEMENT}},
                 {AnnotationType::COOPERATIVE, {"cooperative", AnnotationCategory::SOCIAL_ENGAGEMENT}},
+                {AnnotationType::OTHER_SOCIAL_ENGAGEMENT, {"?", AnnotationCategory::SOCIAL_ENGAGEMENT}},
 
                 {AnnotationType::PROSOCIAL, {"prosocial", AnnotationCategory::SOCIAL_ATTITUDE}},
                 {AnnotationType::ADVERSARIAL, {"adversarial", AnnotationCategory::SOCIAL_ATTITUDE}},
                 {AnnotationType::ASSERTIVE, {"assertive", AnnotationCategory::SOCIAL_ATTITUDE}},
                 {AnnotationType::FRUSTRATED, {"frustrated", AnnotationCategory::SOCIAL_ATTITUDE}},
                 {AnnotationType::PASSIVE, {"passive", AnnotationCategory::SOCIAL_ATTITUDE}},
-
-                {AnnotationType::MISSING, {"missing", AnnotationCategory::OTHER}},
-                {AnnotationType::CONFLICT, {"conflict", AnnotationCategory::OTHER}}
+                {AnnotationType::OTHER_SOCIAL_ATTITUDE, {"?", AnnotationCategory::SOCIAL_ATTITUDE}},
 };
 
 AnnotationType annotationFromName(const std::string& name);
@@ -74,10 +79,16 @@ AnnotationType annotationFromName(const std::string& name);
 struct Annotation
 {
     static std::map<AnnotationType, QPen> Styles;
+    static QPen CONFLICT_PEN;
 
     AnnotationType type;
     ros::Time start;
     ros::Time stop;
+
+    bool isConflicted;
+
+    Annotation(AnnotationType type, ros::Time start, ros::Time stop, bool isConflicted=false) :
+        type(type), start(start), stop(stop), isConflicted(isConflicted) {}
 
     std::string name() const {return AnnotationNames.at(type).first;}
     AnnotationCategory category() const {return AnnotationNames.at(type).second;}

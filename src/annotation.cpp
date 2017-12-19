@@ -4,6 +4,7 @@ using namespace std;
 
 const ros::Duration MAX_TIME_TO_MERGE(0.5);
 
+
 std::map<AnnotationType, QPen> Annotation::Styles = {
             {AnnotationType::GOALORIENTED, QPen(QBrush(QColor("#4CAF50")), 2, Qt::SolidLine)},
             {AnnotationType::AIMLESS, QPen(QBrush(QColor("#ff6f00")), 2, Qt::SolidLine)},
@@ -22,8 +23,10 @@ std::map<AnnotationType, QPen> Annotation::Styles = {
             {AnnotationType::FRUSTRATED, QPen(QBrush(QColor("#9c27b0")), 2, Qt::SolidLine)},
             {AnnotationType::PASSIVE, QPen(QBrush(QColor("#E3F2FD")), 2, Qt::DotLine)},
 
-            {AnnotationType::CONFLICT, QPen(QBrush(QColor("#FF0000")), 3, Qt::SolidLine)}
+            {AnnotationType::OTHER, QPen(QBrush(QColor("#555599")), 1, Qt::SolidLine)}
         };
+
+QPen Annotation::CONFLICT_PEN = QPen(QBrush(QColor("#FF0000")), 3, Qt::SolidLine);
 
 AnnotationType annotationFromName(const std::string& name) {
     for (const auto& kv : AnnotationNames) {
@@ -294,10 +297,27 @@ Annotations diff(const Annotations &annotations1, const Annotations &annotations
         auto type1 = a1.getAnnotationTypeAt(time_splits[t]);
         auto type2 = a2.getAnnotationTypeAt(time_splits[t]);
 
-        if(type1 == type2)
+        if(type1 == type2) {
+            if(type1 == AnnotationType::MISSING) {continue;}
             diffs.add({type1, time_splits[t], time_splits[t+1]});
-        else
-            diffs.add({AnnotationType::CONFLICT, time_splits[t], time_splits[t+1]});
+        }
+        else {
+            auto category = (type1 == AnnotationType::MISSING) ? AnnotationNames.at(type2).second : AnnotationNames.at(type1).second;
+            switch (category) {
+            case AnnotationCategory::TASK_ENGAGEMENT:
+                diffs.add({AnnotationType::OTHER_TASK_ENGAGEMENT, time_splits[t], time_splits[t+1], true}); // conflicted!
+                break;
+            case AnnotationCategory::SOCIAL_ENGAGEMENT:
+                diffs.add({AnnotationType::OTHER_SOCIAL_ENGAGEMENT, time_splits[t], time_splits[t+1], true}); // conflicted!
+                break;
+            case AnnotationCategory::SOCIAL_ATTITUDE:
+                diffs.add({AnnotationType::OTHER_SOCIAL_ATTITUDE, time_splits[t], time_splits[t+1], true}); // conflicted!
+                break;
+            default:
+                assert(false);
+                break;
+            }
+        }
     }
 
     return diffs;

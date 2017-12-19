@@ -312,8 +312,8 @@ void Timeline::drawTimeline(QPainter *painter, int left, int right, int top, int
     }
     else {
         for(const auto a : purpleAnnotations) drawAnnotation(painter, a, purpleAnnotationOffset_, left);
-        for(const auto a : purpleAnnotations2) drawAnnotation(painter, a, purpleAnnotationOffset_ + 5, left);
-        for(const auto a : purpleDiff) drawAnnotation(painter, a, purpleAnnotationOffset_ + 10, left);
+        for(const auto a : purpleAnnotations2) drawAnnotation(painter, a, purpleAnnotationOffset_ + 20, left);
+        for(const auto a : purpleDiff) drawAnnotation(painter, a, purpleAnnotationOffset_ + 35, left, true);
 
     }
     
@@ -327,9 +327,12 @@ void Timeline::drawTimeline(QPainter *painter, int left, int right, int top, int
 void Timeline::drawAnnotation(QPainter *painter,
                               AnnotationConstPtr a,
                               int offset,
-                              int left) {
+                              int left,
+                              bool isDiff) {
 
         if(a->type == AnnotationType::MISSING) return;
+
+        if(isDiff && !a->isConflicted) return;
 
         if(mergeMode && a->category() != AnnotationCategory::TASK_ENGAGEMENT) return;
 
@@ -347,7 +350,10 @@ void Timeline::drawAnnotation(QPainter *painter,
         auto x1 = left + start * pxPerSec_;
         auto x2 = left + stop * pxPerSec_;
 
-        painter->setPen(Annotation::Styles[a->type]);
+        if (a->isConflicted)
+            painter->setPen(Annotation::CONFLICT_PEN);
+        else
+            painter->setPen(Annotation::Styles[a->type]);
         painter->drawLine(x1, y, x2-2, y);
 
         QPen capsPen(painter->pen());

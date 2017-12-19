@@ -81,7 +81,7 @@ protected:
 
     QTimer autosaveTimer;
     std::string annotationPath;
-    void drawAnnotation(QPainter *painter, AnnotationConstPtr a, int offset, int left);
+    void drawAnnotation(QPainter *painter, AnnotationConstPtr a, int offset, int left, bool isDiff=false);
 };
 
 #endif
