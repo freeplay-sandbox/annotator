@@ -101,6 +101,16 @@ public:
     const_iterator end() const {return annotations.end();}
     const_iterator cend() const {return annotations.cend();}
 
+    AnnotationPtr& operator[](const int nIndex) {
+        return annotations[nIndex];
+    }
+    const AnnotationPtr& operator[](const int nIndex) const {
+        return annotations[nIndex];
+    }
+    size_t size() const {
+        return annotations.size();
+    }
+
 
     void updateActive(ros::Time time);
     void add(Annotation annotation);
@@ -115,6 +125,11 @@ public:
     ros::Time lastStopTime() const;
 
     AnnotationType getAnnotationTypeAt(ros::Time time) const;
+
+    /** Returns a copy of the annotations, only keeping annotations belonging
+     * to 'category'
+     */
+    Annotations filterByCategory(AnnotationCategory category) const;
 
 private:
 

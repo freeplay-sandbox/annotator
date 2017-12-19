@@ -196,6 +196,20 @@ AnnotationType Annotations::getAnnotationTypeAt(ros::Time time) const
        }
    }
 
+   return AnnotationType::MISSING;
+
+}
+
+Annotations Annotations::filterByCategory(AnnotationCategory category) const
+{
+   Annotations filtered;
+
+   for (auto a : annotations) {
+       if (AnnotationNames.at(a->type).second == category)
+           filtered.add(*a);
+   }
+
+   return filtered;
 }
 
 
