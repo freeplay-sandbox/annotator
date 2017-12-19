@@ -64,7 +64,7 @@ protected:
     Annotations yellowAnnotations;
     Annotations purpleAnnotations;
 
-
+    Annotations yamlToAnnotations(const YAML::Node node);
 
     std::vector<std::shared_ptr<FreeAnnotationWidget>> freeAnnotations;
     void placeFreeAnnotations();

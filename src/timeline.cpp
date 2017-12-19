@@ -126,31 +126,31 @@ void Timeline::setSavePath(const string &path)
     annotationPath = path;
 }
 
+Annotations Timeline::yamlToAnnotations(const YAML::Node node)
+{
+    Annotations annotations;
+
+    for (const auto& as : node) {
+        for (const auto& a : as) {
+            auto type = annotationFromName(a.first.as<string>());
+            auto ts = a.second.as<vector<double>>();
+            annotations.add({type, ros::Time(ts[0]), ros::Time(ts[1])});
+        }
+    }
+    return annotations;
+}
+
 void Timeline::loadFromFile(const string& path)
 {
     qDebug() << "Loading " << QString::fromStdString(path);
 
-    YAML::Node node = YAML::LoadFile(path);
-
     emit togglePause();
 
-    purpleAnnotations.clear();
-    yellowAnnotations.clear();
+    YAML::Node node = YAML::LoadFile(path);
 
-    for (const auto& as : node["purple"]) {
-        for (const auto& a : as) {
-            auto type = annotationFromName(a.first.as<string>());
-            auto ts = a.second.as<vector<double>>();
-            purpleAnnotations.add({type, ros::Time(ts[0]), ros::Time(ts[1])});
-        }
-    }
-    for (const auto& as : node["yellow"]) {
-        for (const auto& a : as) {
-            auto type = annotationFromName(a.first.as<string>());
-            auto ts = a.second.as<vector<double>>();
-            yellowAnnotations.add({type, ros::Time(ts[0]), ros::Time(ts[1])});
-        }
-    }
+
+    purpleAnnotations = yamlToAnnotations(node["purple"]);
+    yellowAnnotations = yamlToAnnotations(node["yellow"]);
 
     purpleAnnotations.lockAllCategories();
     yellowAnnotations.lockAllCategories();
