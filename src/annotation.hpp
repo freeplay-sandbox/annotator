@@ -18,7 +18,8 @@ enum class StreamType {PURPLE, YELLOW, GLOBAL};
 enum class AnnotationCategory {
                     TASK_ENGAGEMENT,
                     SOCIAL_ENGAGEMENT,
-                    SOCIAL_ATTITUDE
+                    SOCIAL_ATTITUDE,
+                    OTHER
             };
 
 const std::array<AnnotationCategory,3> AnnotationCategories {AnnotationCategory::TASK_ENGAGEMENT,
@@ -62,7 +63,10 @@ const std::map<AnnotationType, std::pair<std::string, AnnotationCategory>> Annot
                 {AnnotationType::ADVERSARIAL, {"adversarial", AnnotationCategory::SOCIAL_ATTITUDE}},
                 {AnnotationType::ASSERTIVE, {"assertive", AnnotationCategory::SOCIAL_ATTITUDE}},
                 {AnnotationType::FRUSTRATED, {"frustrated", AnnotationCategory::SOCIAL_ATTITUDE}},
-                {AnnotationType::PASSIVE, {"passive", AnnotationCategory::SOCIAL_ATTITUDE}}
+                {AnnotationType::PASSIVE, {"passive", AnnotationCategory::SOCIAL_ATTITUDE}},
+
+                {AnnotationType::MISSING, {"missing", AnnotationCategory::OTHER}},
+                {AnnotationType::CONFLICT, {"conflict", AnnotationCategory::OTHER}}
 };
 
 AnnotationType annotationFromName(const std::string& name);
@@ -148,7 +152,7 @@ private:
 * Generates the 'diff' of 2 sets of annotations: a new annotations set representing only the differences between the 2
 * provided annotations sets.
 */
-Annotations diff(const Annotations& a1, const Annotations& a2);
+Annotations diff(const Annotations& annotations1, const Annotations& annotations2);
 
 
 #endif // ANNOTATION_H

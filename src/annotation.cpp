@@ -1,7 +1,3 @@
-
-#include <QDebug>
-#include <algorithm>
-
 #include "annotation.hpp"
 
 using namespace std;
@@ -243,43 +239,52 @@ YAML::Emitter& operator<< (YAML::Emitter& out, const Annotations& a)
     return out;
 }
 
-Annotations diff(const Annotations &a1, const Annotations &a2)
+
+Annotations diff(const Annotations &annotations1, const Annotations &annotations2)
 {
 
-    auto current_a1 = a1.cbegin();
-    auto current_a2 = a2.cbegin();
-    auto current_time = min((*current_a1)->start, (*current_a2)->start);
+    auto a1 = annotations1.filterByCategory(AnnotationCategory::TASK_ENGAGEMENT);
+    auto a2 = annotations2.filterByCategory(AnnotationCategory::TASK_ENGAGEMENT);
 
 
     // first, calculate all the 'time splits', ie the time intervals resulting from the
     // intersection of the 2 annotations streams.
+    vector<ros::Time> next_time_candidates;
+    size_t idx1 = 0;
+    size_t idx2 = 0;
+    auto current_time = min(a1[idx1]->start, a2[idx2]->start);
     vector<ros::Time> time_splits {current_time};
+
     while(true) {
-        vector<ros::Time> next_time_candidates;
 
-        if(current_a1 != a1.cend()) {
-            if(current_time < (*current_a1)->start)
-                next_time_candidates.push_back((*current_a1)->start);
-            if(current_time < (*current_a1)->stop)
-                next_time_candidates.push_back((*current_a1)->stop);
+        if(idx1 < a1.size()) {
+            if(current_time < a1[idx1]->start)
+                next_time_candidates.push_back(a1[idx1]->start);
+            if(current_time < a1[idx1]->stop)
+                next_time_candidates.push_back(a1[idx1]->stop);
         }
 
-        if(current_a2 != a2.cend()) {
-            if(current_time < (*current_a2)->start)
-                next_time_candidates.push_back((*current_a2)->start);
-            if(current_time < (*current_a2)->stop)
-                next_time_candidates.push_back((*current_a2)->stop);
+        if(idx2 < a2.size()) {
+            if(current_time < a2[idx2]->start)
+                next_time_candidates.push_back(a2[idx2]->start);
+            if(current_time < a2[idx2]->stop)
+                next_time_candidates.push_back(a2[idx2]->stop);
         }
 
-        auto next_time_split = *std::min_element(next_time_candidates.begin(), next_time_candidates.end());
+        ros::Time next_time_split = next_time_candidates[0];
+        for (auto t : next_time_candidates) {
+            next_time_split = min(next_time_split, t);
+        }
+
+        next_time_candidates.clear();
 
         time_splits.push_back(next_time_split);
         current_time = next_time_split;
 
-        if(next_time_split == (*current_a1)->stop) current_a1++;
-        if(next_time_split == (*current_a2)->stop) current_a2++;
+        if(idx1 < a1.size() && next_time_split == a1[idx1]->stop) idx1++;
+        if(idx2 < a2.size() && next_time_split == a2[idx2]->stop) idx2++;
 
-        if(current_a1 == a1.cend() && current_a2 == a2.cend()) break;
+        if(idx1 >= a1.size() && idx2 >= a2.size()) break;
     }
 
     // second, for each time splits, check whether the two original annotation streams
